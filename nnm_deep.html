@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Ketto — NGO Non-Medical Deep Dive</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+:root{--bg:#0a0a0f;--surface:#13131a;--surface2:#1c1c26;--border:#2a2a3a;--text:#e8e8f0;--muted:#6b6b85;--accent:#00d4aa;--up:#00d4aa;--down:#ff4d6d;--warn:#ffa940;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;}
+::-webkit-scrollbar{width:4px;height:4px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.ph{padding:14px 32px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;background:var(--bg);}
+.back{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--muted);text-decoration:none;padding:6px 12px;border:1px solid var(--border);border-radius:6px;transition:all 0.15s;}
+.back:hover{color:var(--text);border-color:#7c6fcd;}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;}
+.pt{font-size:15px;font-weight:700;}
+.pp{font-size:11px;color:var(--muted);font-family:var(--mono);margin-left:auto;}
+.content{padding:24px 32px;max-width:1440px;}
+.sh{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;margin-top:28px;}
+.sh:first-child{margin-top:0;}
+.st{font-size:10px;font-family:var(--mono);letter-spacing:2px;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+.sl{flex:1;height:1px;background:var(--border);}
+.sd{font-size:11px;color:var(--muted);font-family:var(--mono);white-space:nowrap;}
+.g{display:grid;gap:14px;}.g2{grid-template-columns:1fr 1fr;}.g3{grid-template-columns:1fr 1fr 1fr;}.g21{grid-template-columns:2fr 1fr;}.g12{grid-template-columns:1fr 2fr;}
+.box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;}
+.bh{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
+.bt{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px;}.bw{font-size:11px;color:var(--muted);}
+.cw{position:relative;height:200px;}.cw.tall{height:240px;}.cw.short{height:150px;}
+.dt{width:100%;border-collapse:collapse;font-size:11px;}
+.dt th{text-align:left;color:var(--muted);font-weight:500;padding:6px 10px;border-bottom:1px solid var(--border);letter-spacing:0.5px;text-transform:uppercase;font-size:10px;font-family:var(--mono);}
+.dt td{padding:7px 10px;border-bottom:1px solid rgba(42,42,58,0.4);font-family:var(--mono);font-size:11px;}
+.dt tr:hover td{background:var(--surface2);}
+.num{text-align:right;}
+.badge{display:inline-block;padding:2px 7px;border-radius:3px;font-size:10px;font-weight:600;font-family:var(--mono);}
+.up{background:rgba(0,212,170,0.12);color:#00d4aa;}.down{background:rgba(255,77,109,0.12);color:#ff4d6d;}.warn{background:rgba(255,169,64,0.12);color:#ffa940;}.neutral{background:rgba(107,107,133,0.12);color:#6b6b85;}
+.ib{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:12px 16px;font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:14px;}
+.ib strong{color:var(--text);font-weight:600;}
+.tb{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.tbtn{padding:6px 14px;font-size:12px;font-weight:500;border:1px solid var(--border);background:var(--surface);color:var(--muted);border-radius:6px;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:6px;}
+.tbtn:hover{color:var(--text);}.tbtn.active{background:var(--accent);border-color:var(--accent);color:white;}
+.tw{position:relative;display:inline-flex;align-items:center;cursor:help;}
+.ti{width:14px;height:14px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);font-size:9px;color:var(--muted);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
+.tb2{display:none;position:absolute;top:22px;left:0;z-index:999;background:#1c1c26;border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:11px;color:var(--muted);font-family:var(--mono);width:280px;line-height:1.6;box-shadow:0 8px 24px rgba(0,0,0,0.6);}
+.tw:hover .tb2{display:block;}
+</style>
+</head>
+<body>
+<div class="ph">
+  <a href="index.html" class="back">← Back</a>
+  <div class="dot"></div>
+  <div class="pt">NGO Non-Medical — Deep Dive</div>
+  <div class="pp">Jan vs Feb 2026 · Campaign-Level Analysis</div>
+</div>
+<div class="content">
+
+  <div class="sh"><span class="st">01 — Payment Funnel MoM</span><div class="sl"></div><span class="sd">Where did conversion change Jan→Feb?</span></div>
+  <div id="fi" class="ib"></div>
+  <div class="g g21">
+    <div class="box"><div class="bh"><div><div class="bt">Step-by-Step Conversion — Jan vs Feb</div><div class="bw">Each row shows conversion rate at that step. Δ = change in percentage points.</div></div></div><div id="fct"></div></div>
+    <div class="box"><div class="bh"><div><div class="bt">Volume Change Jan→Feb</div><div class="bw">Volume-driven vs rate-driven diagnosis</div></div></div><div class="cw short"><canvas id="vc"></canvas></div></div>
+  </div>
+
+  <div class="sh" style="margin-top:28px"><span class="st">02 — Pareto Survival</span><div class="sl"></div><span class="sd">Which campaigns held their position Jan→Feb?</span></div>
+  <div id="pi" class="ib"></div>
+  <div class="g g21">
+    <div class="box"><div class="bh"><div><div class="bt">Pareto Curve — Feb 2026</div><div class="bw">Steeper curve = higher donation concentration in fewer campaigns</div></div></div><div class="cw tall"><canvas id="pc"></canvas></div></div>
+    <div class="box"><div class="bh"><div><div class="bt">Slab Migration — Jan → Feb</div><div class="bw">For each slab: survived / dropped / zeroed / new entrants</div></div></div><div id="ps" style="overflow-y:auto;max-height:280px;"></div></div>
+  </div>
+
+  <div class="sh" style="margin-top:28px"><span class="st">03 — Campaign Funnel Performance</span><div class="sl"></div><span class="sd">Best vs Worst by Initiate→Placed % · Feb 2026</span></div>
+  <div class="tb">
+    <button class="tbtn active ft" onclick="showFTab('best',this)">Best Performers</button>
+    <button class="tbtn ft" onclick="showFTab('worst',this)">Worst Performers</button>
+  </div>
+  <div class="box"><div id="fb"></div><div id="fw" style="display:none"></div></div>
+
+  <div class="sh" style="margin-top:28px"><span class="st">04 — Campaign Droppers</span><div class="sl"></div><span class="sd">3 lenses on campaigns that declined Jan→Feb</span></div>
+  <div class="tb">
+    <button class="tbtn active dt2" onclick="showDTab('dr',this)">
+      Relative Drop
+      <span class="tw" onclick="event.stopPropagation()"><span class="ti">?</span><span class="tb2">Donation fell &gt;50% MoM. Raised significantly last month but halved — may indicate campaign fatigue or fundraising goal reached.</span></span>
+    </button>
+    <button class="tbtn dt2" onclick="showDTab('dd',this)">
+      Disappeared
+      <span class="tw" onclick="event.stopPropagation()"><span class="ti">?</span><span class="tb2">Was in Top 50 last month, not in Top 50 this month. Was a strong performer but fell out of top contributors — worth checking if campaign is still active.</span></span>
+    </button>
+    <button class="tbtn dt2" onclick="showDTab('dz',this)">
+      Zero'd Out
+      <span class="tw" onclick="event.stopPropagation()"><span class="ti">?</span><span class="tb2">Raised &gt;₹0 last month, raised ₹0 this month. Completely stopped receiving donations — campaign may have ended, been paused, or lost visibility.</span></span>
+    </button>
+  </div>
+  <div class="box"><div id="dr"></div><div id="dd" style="display:none"></div><div id="dz" style="display:none"></div></div>
+
+  <div class="sh" style="margin-top:28px"><span class="st">05 — Conversion Drop Root Cause</span><div class="sl"></div><span class="sd">Which campaigns pulled overall conversion down?</span></div>
+  <div id="ci" class="ib"></div>
+  <div class="g g21">
+    <div class="box"><div class="bh"><div><div class="bt">Campaigns with Sharpest Conversion Drop</div><div class="bw">Lost Orders = Feb visitors × conversion delta — shows actual volume impact</div></div></div><div style="overflow-y:auto;max-height:280px"><table class="dt" id="cdt"></table></div></div>
+    <div class="box"><div class="bh"><div><div class="bt">Conversion Rate: Jan vs Feb</div><div class="bw">Gap between bars = lost conversion per campaign</div></div></div><div class="cw tall"><canvas id="cdc"></canvas></div></div>
+  </div>
+
+  <div style="height:40px"></div>
+</div>
+
+<script>
+const D = {"main": {"months": ["2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02"], "donation": [5260679, 11717546, 6278575, 5241600, 5665814, 13821237, 15344002], "orders": [2123, 3251, 2093, 1399, 2189, 11022, 15979], "donors": [1904, 2980, 1966, 1299, 1988, 9641, 12006], "asv": [2477.945831370702, 3604.289756997847, 2999.7969421882467, 3746.676197283774, 2588.311557788945, 1253.968154599891, 960.2604668627574], "tip_amount": [283290, 405772, 235977, 157273, 211860, 538910, 521352], "tip_pct": [0.35233160621761656, 0.4740079975392187, 0.44911610129001434, 0.38527519656897785, 0.40155322064869803, 0.4090909090909091, 0.34632955754427686], "avg_tip": [378.7299465240642, 263.31732641142116, 251.03936170212765, 291.78664192949907, 241.02389078498294, 119.51874029718341, 94.20889049512107], "campaign_views": [258783, 357892, 201915, 118922, 93072, 250242, 291415], "uq_visitors": [228760, 316108, 176999, 104358, 70865, 131723, 141991], "order_conversion": [0.00928046861339395, 0.0102844597416073, 0.011824925564551211, 0.013405776270146995, 0.03088971988993156, 0.08367559196192009, 0.11253530153319577], "rev_per_user": [22.996498513726177, 37.068172902931906, 35.47237555014435, 50.227102857471394, 79.9522190079729, 104.92652763754242, 108.06320118880774], "initiate_to_placed": [0.08855796103950278, 0.07719339902647512, 0.08053717100200092, 0.0801857052788445, 0.1307255897282771, 0.29351299531316577, 0.41632578619629507], "contri_initiated": [23973, 42115, 25988, 17447, 16745, 37552, 38381], "cart_created": [19892, 22409, 18137, 14212, 14523, 24493, 26097], "order_created": [3109, 4762, 2919, 1977, 2931, 14605, 20246], "order_placed": [2123, 3251, 2093, 1399, 2189, 11022, 15979], "funnel_pct1": [0.6828562238661949, 0.6826963460730785, 0.7170263788968825, 0.7076378351036925, 0.7468440805185943, 0.7546730571722013, 0.7892423194705127], "sac_initiated": [19566, 19275, 19532, 14856, 14638, 16408, 15291], "step1": [160, 161, 146, 127, 111, 146, 116], "step2": [146, 142, 143, 121, 104, 131, 112], "step3": [129, 122, 128, 112, 90, 114, 97], "sac_completion": [0, 0, 0, 0, 0, 0, 0], "campaigns_live": [19650, 19558, 18661, 18602, 18655, 21971, 3896], "campaign_days_live": [0, 0, 0, 0, 0, 0, 0], "avg_days_live": [0, 0, 0, 0, 0, 0, 0], "campaigns_approved": [127, 131, 241, 117, 151, 3370, 246], "campaigns_raised": [213, 145, 200, 175, 212, 1758, 2671], "raised_live_pct": [0, 0, 0, 0, 0, 0, 0], "offline_amount": [3600, 5, 1, 8502, 35000, 10000, 1], "offline_count": [3, 1, 1, 10, 3, 1, 1], "comp": {"donation": {"prev": 0.11017573897329161, "3m": 0.8614847206990789, "6m": 0.9185817801316486}, "orders": {"prev": 0.44973688985665033, "3m": 2.2811088295687885, "6m": 3.3427096072835982}, "donors": {"prev": 0.24530650347474328, "3m": 1.786045792079208, "6m": 2.6422287390029324}, "tip": {"prev": -0.03258057931751127, "3m": 0.722447064731516, "6m": 0.7064768515538311}, "asv": {"prev": -0.2342226049838149, "3m": -0.6203981898331322, "6m": -0.6543958493023069}, "conversion": {"prev": 0.3448999749462117, "3m": 1.6381420174980275, "6m": 3.2369968484694494}, "visitors": {"prev": 0.0779514587429682, "3m": 0.3877783062818868, "6m": -0.17191365194646652}, "raised_live": {}}, "raw": {"monthly": [{"month_str": "2025-08", "campaigns_live": 39347, "total_pageviews": 258783, "total_uq_visitors": 231703, "total_contri_initiated": 9629, "total_cart_created": 6710, "total_order_created": 3109, "total_order_placed": 2123, "total_donors": 1933, "total_donation": 5260680.0, "tipped_orders": 748, "tip_amount": 283292.0, "campaigns_raised": 166}, {"month_str": "2025-09", "campaigns_live": 39497, "total_pageviews": 357891, "total_uq_visitors": 318607, "total_contri_initiated": 23010, "total_cart_created": 8335, "total_order_created": 4762, "total_order_placed": 3251, "total_donors": 3019, "total_donation": 11717546.0, "tipped_orders": 1541, "tip_amount": 405771.0, "campaigns_raised": 101}, {"month_str": "2025-10", "campaigns_live": 40788, "total_pageviews": 201915, "total_uq_visitors": 179638, "total_contri_initiated": 12362, "total_cart_created": 5827, "total_order_created": 2919, "total_order_placed": 2093, "total_donors": 2017, "total_donation": 6278574.0, "tipped_orders": 940, "tip_amount": 235977.0, "campaigns_raised": 153}, {"month_str": "2025-11", "campaigns_live": 37658, "total_pageviews": 118922, "total_uq_visitors": 106002, "total_contri_initiated": 6645, "total_cart_created": 4121, "total_order_created": 1977, "total_order_placed": 1399, "total_donors": 1346, "total_donation": 5241600.0, "tipped_orders": 539, "tip_amount": 157273.0, "campaigns_raised": 118}, {"month_str": "2025-12", "campaigns_live": 27630, "total_pageviews": 93072, "total_uq_visitors": 73186, "total_contri_initiated": 5744, "total_cart_created": 4542, "total_order_created": 2931, "total_order_placed": 2188, "total_donors": 2042, "total_donation": 5659817.0, "tipped_orders": 879, "tip_amount": 211861.0, "campaigns_raised": 170}, {"month_str": "2026-01", "campaigns_live": 31359, "total_pageviews": 250242, "total_uq_visitors": 141116, "total_contri_initiated": 20205, "total_cart_created": 13412, "total_order_created": 14605, "total_order_placed": 11019, "total_donors": 10053, "total_donation": 13812341.0, "tipped_orders": 4509, "tip_amount": 538912.0, "campaigns_raised": 1707}, {"month_str": "2026-02", "campaigns_live": 29873, "total_pageviews": 291415, "total_uq_visitors": 154792, "total_contri_initiated": 22867, "total_cart_created": 16608, "total_order_created": 20246, "total_order_placed": 15977, "total_donors": 13765, "total_donation": 15331006.0, "tipped_orders": 5532, "tip_amount": 520209.0, "campaigns_raised": 2640}], "top10_feb": [{"campaign_id": 1106182, "pageviews": 384, "uq_visitor": 278, "total_donors": 5, "total_donation": 201719.0, "tip_amount": 1485.0, "order_placed": 7}, {"campaign_id": 1109501, "pageviews": 726, "uq_visitor": 208, "total_donors": 53, "total_donation": 195972.0, "tip_amount": 3404.0, "order_placed": 57}, {"campaign_id": 1107018, "pageviews": 230, "uq_visitor": 103, "total_donors": 31, "total_donation": 153257.0, "tip_amount": 10777.0, "order_placed": 33}, {"campaign_id": 1000378, "pageviews": 2013, "uq_visitor": 800, "total_donors": 132, "total_donation": 149598.0, "tip_amount": 10.0, "order_placed": 187}, {"campaign_id": 1114742, "pageviews": 313, "uq_visitor": 103, "total_donors": 9, "total_donation": 140650.0, "tip_amount": 0.0, "order_placed": 11}, {"campaign_id": 924997, "pageviews": 503, "uq_visitor": 356, "total_donors": 3, "total_donation": 123197.0, "tip_amount": 2760.0, "order_placed": 3}, {"campaign_id": 1085242, "pageviews": 920, "uq_visitor": 415, "total_donors": 120, "total_donation": 121739.0, "tip_amount": 0.0, "order_placed": 121}, {"campaign_id": 1020964, "pageviews": 716, "uq_visitor": 333, "total_donors": 95, "total_donation": 113774.0, "tip_amount": 0.0, "order_placed": 95}, {"campaign_id": 1107891, "pageviews": 359, "uq_visitor": 72, "total_donors": 9, "total_donation": 111348.0, "tip_amount": 3019.0, "order_placed": 10}, {"campaign_id": 1105878, "pageviews": 875, "uq_visitor": 197, "total_donors": 62, "total_donation": 109589.0, "tip_amount": 9145.0, "order_placed": 63}]}}, "deep": {"funnel_compare": {"jan": {"contri_initiated": 20205, "cart_created": 13412, "order_created": 14605, "order_placed": 11019, "total_donation": 13812341.0, "uq_visitor": 141116}, "feb": {"contri_initiated": 22867, "cart_created": 16608, "order_created": 20246, "order_placed": 15977, "total_donation": 15331006.0, "uq_visitor": 154792}, "steps": [{"name": "Visitors\u2192Initiated", "jan": 14.318007880041952, "feb": 14.772727272727273}, {"name": "Initiated\u2192Cart", "jan": 66.37960900767138, "feb": 72.62867888223204}, {"name": "Cart\u2192Order Created", "jan": 99.9, "feb": 99.9}, {"name": "Order Created\u2192Placed", "jan": 75.4467648065731, "feb": 78.91435345253383}, {"name": "Overall Initiate\u2192Placed", "jan": 54.536005939123974, "feb": 69.86924388857305}]}, "pareto_survival": [{"slab": "Top 1%", "jan_count": 17, "jan_donation": 3750994.0, "jan_pct_of_total": 27.15683025781075, "survived_count": 4, "dropped_count": 4, "zeroed_count": 9, "feb_slab_donation": 2781225.0, "feb_slab_pct": 18.14117742827835, "survived_feb_donation": 560747.0, "new_entrants": 22}, {"slab": "1-5%", "jan_count": 68, "jan_donation": 4081023.0, "jan_pct_of_total": 29.546207988928163, "survived_count": 15, "dropped_count": 31, "zeroed_count": 22, "feb_slab_donation": 3680890.0, "feb_slab_pct": 24.00944856456256, "survived_feb_donation": 605771.0, "new_entrants": 91}, {"slab": "5-10%", "jan_count": 85, "jan_donation": 1691621.0, "jan_pct_of_total": 12.247170845260772, "survived_count": 7, "dropped_count": 62, "zeroed_count": 16, "feb_slab_donation": 2157482.0, "feb_slab_pct": 14.072670769289372, "survived_feb_donation": 116661.0, "new_entrants": 125}, {"slab": "10-20%", "jan_count": 171, "jan_donation": 1699835.0, "jan_pct_of_total": 12.306639403125075, "survived_count": 22, "dropped_count": 113, "zeroed_count": 36, "feb_slab_donation": 2438245.0, "feb_slab_pct": 15.90401177848342, "survived_feb_donation": 217498.0, "new_entrants": 242}, {"slab": "Bottom 80%", "jan_count": 1366, "jan_donation": 2588868.0, "jan_pct_of_total": 18.74315150487524, "survived_count": 931, "dropped_count": 211, "zeroed_count": 224, "feb_slab_donation": 4273164.0, "feb_slab_pct": 27.87269145938629, "survived_feb_donation": 1997581.0, "new_entrants": 1181}], "pareto_curve": [{"x": 0.04, "y": 1.32}, {"x": 0.08, "y": 2.59}, {"x": 0.11, "y": 3.59}, {"x": 0.15, "y": 4.57}, {"x": 0.19, "y": 5.49}, {"x": 0.23, "y": 6.29}, {"x": 0.27, "y": 7.08}, {"x": 0.3, "y": 7.83}, {"x": 0.34, "y": 8.55}, {"x": 0.38, "y": 9.27}, {"x": 0.42, "y": 9.98}, {"x": 0.45, "y": 10.67}, {"x": 0.49, "y": 11.35}, {"x": 0.53, "y": 12.02}, {"x": 0.57, "y": 12.61}, {"x": 0.61, "y": 13.18}, {"x": 0.64, "y": 13.74}, {"x": 0.68, "y": 14.27}, {"x": 0.72, "y": 14.79}, {"x": 0.76, "y": 15.3}, {"x": 0.8, "y": 15.79}, {"x": 0.83, "y": 16.27}, {"x": 0.87, "y": 16.76}, {"x": 0.91, "y": 17.23}, {"x": 0.95, "y": 17.69}, {"x": 0.98, "y": 18.14}, {"x": 1.02, "y": 18.59}, {"x": 1.06, "y": 19.03}, {"x": 1.1, "y": 19.44}, {"x": 1.14, "y": 19.85}, {"x": 1.17, "y": 20.25}, {"x": 1.21, "y": 20.63}, {"x": 1.25, "y": 21.0}, {"x": 1.29, "y": 21.37}, {"x": 1.33, "y": 21.74}, {"x": 1.36, "y": 22.1}, {"x": 1.4, "y": 22.44}, {"x": 1.44, "y": 22.79}, {"x": 1.48, "y": 23.13}, {"x": 1.52, "y": 23.48}, {"x": 1.55, "y": 23.81}, {"x": 1.59, "y": 24.15}, {"x": 1.63, "y": 24.48}, {"x": 1.67, "y": 24.81}, {"x": 1.7, "y": 25.13}, {"x": 1.74, "y": 25.43}, {"x": 1.78, "y": 25.74}, {"x": 1.82, "y": 26.02}, {"x": 1.86, "y": 26.28}, {"x": 1.89, "y": 26.54}, {"x": 1.93, "y": 26.79}, {"x": 1.97, "y": 27.05}, {"x": 2.01, "y": 27.3}, {"x": 2.05, "y": 27.55}, {"x": 2.08, "y": 27.8}, {"x": 2.12, "y": 28.05}, {"x": 2.16, "y": 28.29}, {"x": 2.2, "y": 28.52}, {"x": 2.23, "y": 28.75}, {"x": 2.27, "y": 28.98}, {"x": 2.31, "y": 29.21}, {"x": 2.35, "y": 29.43}, {"x": 2.39, "y": 29.66}, {"x": 2.42, "y": 29.88}, {"x": 2.46, "y": 30.1}, {"x": 2.5, "y": 30.32}, {"x": 2.54, "y": 30.54}, {"x": 2.58, "y": 30.76}, {"x": 2.61, "y": 30.97}, {"x": 2.65, "y": 31.18}, {"x": 2.69, "y": 31.39}, {"x": 2.73, "y": 31.6}, {"x": 2.77, "y": 31.81}, {"x": 2.8, "y": 32.02}, {"x": 2.84, "y": 32.23}, {"x": 2.88, "y": 32.43}, {"x": 2.92, "y": 32.63}, {"x": 2.95, "y": 32.83}, {"x": 2.99, "y": 33.03}, {"x": 3.03, "y": 33.23}, {"x": 3.07, "y": 33.43}, {"x": 3.11, "y": 33.62}, {"x": 3.14, "y": 33.82}, {"x": 3.18, "y": 34.01}, {"x": 3.22, "y": 34.21}, {"x": 3.26, "y": 34.4}, {"x": 3.3, "y": 34.6}, {"x": 3.33, "y": 34.79}, {"x": 3.37, "y": 34.97}, {"x": 3.41, "y": 35.16}, {"x": 3.45, "y": 35.35}, {"x": 3.48, "y": 35.54}, {"x": 3.52, "y": 35.72}, {"x": 3.56, "y": 35.91}, {"x": 3.6, "y": 36.09}, {"x": 3.64, "y": 36.28}, {"x": 3.67, "y": 36.46}, {"x": 3.71, "y": 36.64}, {"x": 3.75, "y": 36.81}, {"x": 3.79, "y": 36.99}, {"x": 3.83, "y": 37.17}, {"x": 3.86, "y": 37.34}, {"x": 3.9, "y": 37.52}, {"x": 3.94, "y": 37.69}, {"x": 3.98, "y": 37.86}, {"x": 4.02, "y": 38.03}, {"x": 4.05, "y": 38.2}, {"x": 4.09, "y": 38.37}, {"x": 4.13, "y": 38.54}, {"x": 4.17, "y": 38.71}, {"x": 4.2, "y": 38.87}, {"x": 4.24, "y": 39.04}, {"x": 4.28, "y": 39.2}, {"x": 4.32, "y": 39.36}, {"x": 4.36, "y": 39.53}, {"x": 4.39, "y": 39.69}, {"x": 4.43, "y": 39.85}, {"x": 4.47, "y": 40.01}, {"x": 4.51, "y": 40.17}, {"x": 4.55, "y": 40.33}, {"x": 4.58, "y": 40.49}, {"x": 4.62, "y": 40.64}, {"x": 4.66, "y": 40.8}, {"x": 4.7, "y": 40.96}, {"x": 4.73, "y": 41.11}, {"x": 4.77, "y": 41.26}, {"x": 4.81, "y": 41.41}, {"x": 4.85, "y": 41.56}, {"x": 4.89, "y": 41.71}, {"x": 4.92, "y": 41.86}, {"x": 4.96, "y": 42.01}, {"x": 5.0, "y": 42.15}, {"x": 5.04, "y": 42.29}, {"x": 5.08, "y": 42.44}, {"x": 5.11, "y": 42.58}, {"x": 5.15, "y": 42.72}, {"x": 5.19, "y": 42.86}, {"x": 5.23, "y": 43.0}, {"x": 5.27, "y": 43.14}, {"x": 5.3, "y": 43.28}, {"x": 5.34, "y": 43.42}, {"x": 5.38, "y": 43.55}, {"x": 5.42, "y": 43.69}, {"x": 5.45, "y": 43.82}, {"x": 5.49, "y": 43.95}, {"x": 5.53, "y": 44.08}, {"x": 5.57, "y": 44.21}, {"x": 5.61, "y": 44.35}, {"x": 5.64, "y": 44.48}, {"x": 5.68, "y": 44.61}, {"x": 5.72, "y": 44.74}, {"x": 5.76, "y": 44.86}, {"x": 5.8, "y": 44.99}, {"x": 5.83, "y": 45.12}, {"x": 5.87, "y": 45.25}, {"x": 5.91, "y": 45.37}, {"x": 5.95, "y": 45.5}, {"x": 5.98, "y": 45.62}, {"x": 6.02, "y": 45.74}, {"x": 6.06, "y": 45.87}, {"x": 6.1, "y": 45.99}, {"x": 6.14, "y": 46.11}, {"x": 6.17, "y": 46.23}, {"x": 6.21, "y": 46.35}, {"x": 6.25, "y": 46.46}, {"x": 6.29, "y": 46.58}, {"x": 6.33, "y": 46.7}, {"x": 6.36, "y": 46.82}, {"x": 6.4, "y": 46.93}, {"x": 6.44, "y": 47.05}, {"x": 6.48, "y": 47.16}, {"x": 6.52, "y": 47.28}, {"x": 6.55, "y": 47.39}, {"x": 6.59, "y": 47.51}, {"x": 6.63, "y": 47.62}, {"x": 6.67, "y": 47.73}, {"x": 6.7, "y": 47.85}, {"x": 6.74, "y": 47.96}, {"x": 6.78, "y": 48.07}, {"x": 6.82, "y": 48.18}, {"x": 6.86, "y": 48.29}, {"x": 6.89, "y": 48.4}, {"x": 6.93, "y": 48.52}, {"x": 6.97, "y": 48.63}, {"x": 7.01, "y": 48.74}, {"x": 7.05, "y": 48.85}, {"x": 7.08, "y": 48.96}, {"x": 7.12, "y": 49.06}, {"x": 7.16, "y": 49.17}, {"x": 7.2, "y": 49.28}, {"x": 7.23, "y": 49.39}, {"x": 7.27, "y": 49.5}, {"x": 7.31, "y": 49.6}, {"x": 7.35, "y": 49.71}, {"x": 7.39, "y": 49.82}, {"x": 7.42, "y": 49.92}, {"x": 7.46, "y": 50.03}, {"x": 7.5, "y": 50.13}, {"x": 7.54, "y": 50.24}, {"x": 7.58, "y": 50.34}], "best_funnel": [{"campaign_id": "1106485", "contri_initiated": 14, "cart_created": 3, "order_created": 31, "order_placed": 30, "initiate_to_placed_pct": 214.28571428571428, "total_donation": 4020.0}, {"campaign_id": "1106576", "contri_initiated": 17, "cart_created": 12, "order_created": 38, "order_placed": 32, "initiate_to_placed_pct": 188.23529411764704, "total_donation": 14800.0}, {"campaign_id": "1106617", "contri_initiated": 14, "cart_created": 9, "order_created": 23, "order_placed": 22, "initiate_to_placed_pct": 157.14285714285714, "total_donation": 2243.0}, {"campaign_id": "1106589", "contri_initiated": 31, "cart_created": 25, "order_created": 52, "order_placed": 48, "initiate_to_placed_pct": 154.83870967741936, "total_donation": 73468.0}, {"campaign_id": "1114426", "contri_initiated": 13, "cart_created": 13, "order_created": 29, "order_placed": 20, "initiate_to_placed_pct": 153.84615384615387, "total_donation": 51101.0}, {"campaign_id": "1105209", "contri_initiated": 12, "cart_created": 12, "order_created": 21, "order_placed": 18, "initiate_to_placed_pct": 150.0, "total_donation": 18499.0}, {"campaign_id": "1106668", "contri_initiated": 15, "cart_created": 11, "order_created": 25, "order_placed": 22, "initiate_to_placed_pct": 146.66666666666666, "total_donation": 31822.0}, {"campaign_id": "1104922", "contri_initiated": 22, "cart_created": 15, "order_created": 33, "order_placed": 32, "initiate_to_placed_pct": 145.45454545454547, "total_donation": 84889.0}, {"campaign_id": "1105539", "contri_initiated": 22, "cart_created": 18, "order_created": 41, "order_placed": 32, "initiate_to_placed_pct": 145.45454545454547, "total_donation": 17950.0}, {"campaign_id": "1106667", "contri_initiated": 14, "cart_created": 11, "order_created": 21, "order_placed": 20, "initiate_to_placed_pct": 142.85714285714286, "total_donation": 4551.0}], "worst_funnel": [{"campaign_id": "1101824", "contri_initiated": 138, "cart_created": 135, "order_created": 1, "order_placed": 1, "initiate_to_placed_pct": 0.7246376811594203, "total_donation": 1500.0}, {"campaign_id": "1114784", "contri_initiated": 13, "cart_created": 4, "order_created": 2, "order_placed": 2, "initiate_to_placed_pct": 15.384615384615385, "total_donation": 20250.0}, {"campaign_id": "1110258", "contri_initiated": 17, "cart_created": 8, "order_created": 9, "order_placed": 4, "initiate_to_placed_pct": 23.52941176470588, "total_donation": 2180.0}, {"campaign_id": "924997", "contri_initiated": 12, "cart_created": 4, "order_created": 4, "order_placed": 3, "initiate_to_placed_pct": 25.0, "total_donation": 123197.0}, {"campaign_id": "1104965", "contri_initiated": 11, "cart_created": 4, "order_created": 6, "order_placed": 3, "initiate_to_placed_pct": 27.27272727272727, "total_donation": 5525.0}, {"campaign_id": "1105605", "contri_initiated": 15, "cart_created": 10, "order_created": 12, "order_placed": 5, "initiate_to_placed_pct": 33.33333333333333, "total_donation": 13000.0}, {"campaign_id": "1106291", "contri_initiated": 15, "cart_created": 3, "order_created": 6, "order_placed": 5, "initiate_to_placed_pct": 33.33333333333333, "total_donation": 2100.0}, {"campaign_id": "1117239", "contri_initiated": 40, "cart_created": 16, "order_created": 23, "order_placed": 14, "initiate_to_placed_pct": 35.0, "total_donation": 38500.0}, {"campaign_id": "1107890", "contri_initiated": 14, "cart_created": 6, "order_created": 6, "order_placed": 5, "initiate_to_placed_pct": 35.714285714285715, "total_donation": 49000.0}, {"campaign_id": "1104755", "contri_initiated": 11, "cart_created": 5, "order_created": 4, "order_placed": 4, "initiate_to_placed_pct": 36.36363636363637, "total_donation": 3000.0}], "relative_drop": [{"campaign_id": "1047248", "jan_donation": 126425.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1047250", "jan_donation": 106890.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1047256", "jan_donation": 23000.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1047257", "jan_donation": 81589.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1047258", "jan_donation": 341480.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1047263", "jan_donation": 81586.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1047267", "jan_donation": 89700.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1047268", "jan_donation": 20150.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1047271", "jan_donation": 71000.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1047272", "jan_donation": 50000.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1050065", "jan_donation": 93084.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1050066", "jan_donation": 90096.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1058124", "jan_donation": 10974.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1058125", "jan_donation": 11320.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1058126", "jan_donation": 180000.0, "feb_donation": 0.0, "don_change_pct": -100.0}], "zeroed_out": [{"campaign_id": "1062322", "jan_donation": 406770.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1047258", "jan_donation": 341480.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "853045", "jan_donation": 227000.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1085177", "jan_donation": 200000.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1059456", "jan_donation": 194226.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1058126", "jan_donation": 180000.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1061301", "jan_donation": 165713.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1066913", "jan_donation": 147800.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1096476", "jan_donation": 140000.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1047248", "jan_donation": 126425.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1047250", "jan_donation": 106890.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1050065", "jan_donation": 93084.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1050066", "jan_donation": 90096.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1047267", "jan_donation": 89700.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1083263", "jan_donation": 84440.0, "feb_donation": 0.0, "don_change_pct": -100.0}], "disappeared": [{"campaign_id": "1062322", "jan_donation": 406770.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1047258", "jan_donation": 341480.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1092092", "jan_donation": 262794.0, "feb_donation": 17650.0, "don_change_pct": -93.28371271794637}, {"campaign_id": "853045", "jan_donation": 227000.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1085177", "jan_donation": 200000.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1059456", "jan_donation": 194226.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1058126", "jan_donation": 180000.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1072457", "jan_donation": 175706.0, "feb_donation": 2500.0, "don_change_pct": -98.57716867949871}, {"campaign_id": "1061301", "jan_donation": 165713.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1047240", "jan_donation": 162824.0, "feb_donation": 5000.0, "don_change_pct": -96.92919962659067}, {"campaign_id": "1066913", "jan_donation": 147800.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1096476", "jan_donation": 140000.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1105310", "jan_donation": 131749.0, "feb_donation": 21551.0, "don_change_pct": -83.64238058732893}, {"campaign_id": "1047242", "jan_donation": 127601.0, "feb_donation": 5000.0, "don_change_pct": -96.08153541116448}, {"campaign_id": "1047248", "jan_donation": 126425.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1052393", "jan_donation": 121834.0, "feb_donation": 33500.0, "don_change_pct": -72.50357043189915}, {"campaign_id": "1083264", "jan_donation": 114810.0, "feb_donation": 14716.0, "don_change_pct": -87.18230119327585}, {"campaign_id": "1047250", "jan_donation": 106890.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1104623", "jan_donation": 106502.0, "feb_donation": 500.0, "don_change_pct": -99.53052524835215}, {"campaign_id": "1105993", "jan_donation": 97946.0, "feb_donation": 15024.0, "don_change_pct": -84.6609356175852}, {"campaign_id": "1050065", "jan_donation": 93084.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1050066", "jan_donation": 90096.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1047267", "jan_donation": 89700.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1104408", "jan_donation": 89430.0, "feb_donation": 16000.0, "don_change_pct": -82.10891199821089}, {"campaign_id": "1083263", "jan_donation": 84440.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1104403", "jan_donation": 82032.0, "feb_donation": 34410.0, "don_change_pct": -58.05295494441194}, {"campaign_id": "1047257", "jan_donation": 81589.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1047263", "jan_donation": 81586.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1105851", "jan_donation": 78937.0, "feb_donation": 16374.0, "don_change_pct": -79.25687573634671}, {"campaign_id": "1099912", "jan_donation": 78200.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1095948", "jan_donation": 72800.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1047271", "jan_donation": 71000.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1105586", "jan_donation": 69520.0, "feb_donation": 34899.0, "don_change_pct": -49.80005753739931}, {"campaign_id": "1093531", "jan_donation": 69031.0, "feb_donation": 10500.0, "don_change_pct": -84.78944242441801}, {"campaign_id": "1104406", "jan_donation": 68934.0, "feb_donation": 31150.0, "don_change_pct": -54.81184901499986}, {"campaign_id": "1104853", "jan_donation": 66252.0, "feb_donation": 25549.0, "don_change_pct": -61.436635875143395}, {"campaign_id": "1081549", "jan_donation": 64336.0, "feb_donation": 0.0, "don_change_pct": -100.0}, {"campaign_id": "1104662", "jan_donation": 61850.0, "feb_donation": 1001.0, "don_change_pct": -98.38156831042846}, {"campaign_id": "1107465", "jan_donation": 60216.0, "feb_donation": 19078.0, "don_change_pct": -68.31739072671715}, {"campaign_id": "1106132", "jan_donation": 56502.0, "feb_donation": 32780.0, "don_change_pct": -41.984354536122616}, {"campaign_id": "1085178", "jan_donation": 54330.0, "feb_donation": 0.0, "don_change_pct": -100.0}], "conv_droppers": [{"campaign_id": "1105516", "conv_rate_jan": 35.294117647058826, "conv_rate_feb": 16.528925619834713, "conv_drop": -18.765192027224114, "uq_visitor_feb": 121, "traffic_impact": -22.705882352941174}, {"campaign_id": "1107245", "conv_rate_jan": 50.90909090909091, "conv_rate_feb": 32.467532467532465, "conv_drop": -18.441558441558442, "uq_visitor_feb": 77, "traffic_impact": -14.2}, {"campaign_id": "1107821", "conv_rate_jan": 17.92452830188679, "conv_rate_feb": 5.333333333333334, "conv_drop": -12.591194968553458, "uq_visitor_feb": 75, "traffic_impact": -9.443396226415093}, {"campaign_id": "1105310", "conv_rate_jan": 18.0, "conv_rate_feb": 6.493506493506493, "conv_drop": -11.506493506493507, "uq_visitor_feb": 154, "traffic_impact": -17.720000000000002}, {"campaign_id": "1107219", "conv_rate_jan": 26.53061224489796, "conv_rate_feb": 15.09433962264151, "conv_drop": -11.43627262225645, "uq_visitor_feb": 53, "traffic_impact": -6.061224489795918}, {"campaign_id": "1107055", "conv_rate_jan": 26.785714285714285, "conv_rate_feb": 15.873015873015872, "conv_drop": -10.912698412698413, "uq_visitor_feb": 63, "traffic_impact": -6.875}, {"campaign_id": "1105466", "conv_rate_jan": 17.94871794871795, "conv_rate_feb": 7.777777777777778, "conv_drop": -10.17094017094017, "uq_visitor_feb": 90, "traffic_impact": -9.153846153846153}, {"campaign_id": "1104634", "conv_rate_jan": 10.144927536231885, "conv_rate_feb": 0.0, "conv_drop": -10.144927536231885, "uq_visitor_feb": 61, "traffic_impact": -6.18840579710145}, {"campaign_id": "1105512", "conv_rate_jan": 13.793103448275861, "conv_rate_feb": 4.545454545454546, "conv_drop": -9.247648902821314, "uq_visitor_feb": 66, "traffic_impact": -6.103448275862068}, {"campaign_id": "1085242", "conv_rate_jan": 38.161993769470406, "conv_rate_feb": 29.156626506024097, "conv_drop": -9.00536726344631, "uq_visitor_feb": 415, "traffic_impact": -37.372274143302185}], "feb_total_donation": 15331006.0, "jan_total_donation": 13812341.0}};
+const DEEP = D.deep;
+const MAIN = D.main;
+
+function fmt(n,t){
+  if(n===null||n===undefined) return '—';
+  n=parseFloat(n);
+  if(isNaN(n)) return '—';
+  if(t==='c'){if(Math.abs(n)>=1e7)return '₹'+(n/1e7).toFixed(2)+'Cr';if(Math.abs(n)>=1e5)return '₹'+(n/1e5).toFixed(1)+'L';if(Math.abs(n)>=1000)return '₹'+(n/1000).toFixed(0)+'K';return '₹'+Math.round(n).toLocaleString('en-IN');}
+  if(t==='n'){if(Math.abs(n)>=1000)return (n/1000).toFixed(1)+'K';return Math.round(n).toLocaleString();}
+  return n;
+}
+function bdg(v,inv){
+  const n=parseFloat(v),cls=n>0?(inv?'down':'up'):n<0?(inv?'up':'down'):'neutral';
+  return `<span class="badge ${cls}">${n>0?'+':''}${n.toFixed(1)}%</span>`;
+}
+function mkChart(id,type,labels,datasets,opts){
+  const el=document.getElementById(id);if(!el)return;
+  const base={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#6b6b85',font:{family:'DM Mono',size:10},boxWidth:10}},tooltip:{backgroundColor:'#1c1c26',titleColor:'#e8e8f0',bodyColor:'#6b6b85',borderColor:'#2a2a3a',borderWidth:1,titleFont:{family:'DM Mono',size:11},bodyFont:{family:'DM Mono',size:10}}},scales:{x:{grid:{color:'#1c1c26'},ticks:{color:'#6b6b85',font:{family:'DM Mono',size:10}}},y:{grid:{color:'#1c1c26'},ticks:{color:'#6b6b85',font:{family:'DM Mono',size:10}}}}};
+  function m(t,s){for(const k in s){if(s[k]&&typeof s[k]==='object'&&!Array.isArray(s[k])){t[k]=t[k]||{};m(t[k],s[k]);}else{t[k]=s[k];}}return t;}
+  new Chart(el,{type,data:{labels,datasets},options:m(base,opts||{})});
+}
+
+// Funnel insight
+(()=>{
+  const st=DEEP.funnel_compare.steps;
+  const ov=st.find(s=>s.name.includes('Overall'));
+  const worst=st.slice(0,4).reduce((a,b)=>(b.feb-b.jan)<(a.feb-a.jan)?b:a);
+  const best=st.slice(0,4).reduce((a,b)=>(b.feb-b.jan)>(a.feb-a.jan)?b:a);
+  const d=ov?ov.feb-ov.jan:0;
+  document.getElementById('fi').innerHTML=`Overall Initiate→Placed: <strong>Jan ${ov?.jan.toFixed(1)}% → Feb ${ov?.feb.toFixed(1)}% (${d>0?'+':''}${d.toFixed(1)}pp)</strong>. Biggest improvement: <strong>${best.name}</strong> (+${(best.feb-best.jan).toFixed(1)}pp). ${worst.feb-worst.jan<0?`Biggest drag: <strong>${worst.name}</strong> (${(worst.feb-worst.jan).toFixed(1)}pp).`:'All steps improved MoM.'} Investigate the step with lowest absolute % — that's where volume leaks.`;
+})();
+
+// Funnel compare table
+(()=>{
+  const st=DEEP.funnel_compare.steps;
+  document.getElementById('fct').innerHTML=`<table class="dt"><thead><tr><th>Funnel Step</th><th class="num">Jan %</th><th class="num">Feb %</th><th class="num">Δ (pp)</th></tr></thead><tbody>`+st.map(s=>{
+    const d=s.feb-s.jan,ov=s.name.includes('Overall');
+    return `<tr style="${ov?'border-top:2px solid var(--border)':''}"><td style="${ov?'font-weight:600;color:var(--text)':''}">${s.name}</td><td class="num">${s.jan.toFixed(1)}%</td><td class="num">${s.feb.toFixed(1)}%</td><td class="num">${bdg(d)}</td></tr>`;
+  }).join('')+`</tbody></table>`;
+})();
+
+// Volume chart
+(()=>{
+  const fc=DEEP.funnel_compare;
+  mkChart('vc','bar',['Initiated','Cart','Ord Created','Placed'],[
+    {label:'Jan 26',data:[fc.jan.contri_initiated,fc.jan.cart_created,fc.jan.order_created,fc.jan.order_placed],backgroundColor:'rgba(107,107,133,0.4)',borderColor:'#6b6b85',borderWidth:1},
+    {label:'Feb 26',data:[fc.feb.contri_initiated,fc.feb.cart_created,fc.feb.order_created,fc.feb.order_placed],backgroundColor:'rgba(255,77,109,0.4)',borderColor:'#ff4d6d',borderWidth:1},
+  ],{scales:{y:{ticks:{callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v}}}});
+})();
+
+// Pareto insight
+(()=>{
+  const ps=DEEP.pareto_survival;
+  const t1=ps.find(p=>p.slab==='Top 1%');
+  const tot=ps.reduce((s,p)=>s+p.jan_count,0),surv=ps.reduce((s,p)=>s+p.survived_count,0);
+  document.getElementById('pi').innerHTML=t1?
+    `<strong>Top 1% (Jan):</strong> ${t1.jan_count} campaigns drove <strong>${t1.jan_pct_of_total.toFixed(1)}%</strong> of Jan donation. In Feb, <strong>${t1.survived_count} of ${t1.jan_count}</strong> held the same slab — ${t1.dropped_count} dropped, ${t1.zeroed_count} zeroed. Feb's Top 1% has ${t1.new_entrants} new entrants. Overall <strong>${surv}/${tot} campaigns (${(surv/tot*100).toFixed(0)}%)</strong> held their slab — high churn rate signals campaign lifecycle instability.`:
+    `Pareto data loaded.`;
+})();
+
+// Pareto curve
+(()=>{
+  const curve=DEEP.pareto_curve;if(!curve) return;
+  const step=Math.max(1,Math.floor(curve.length/80));
+  const pts=curve.filter((_,i)=>i%step===0);
+  mkChart('pc','line',pts.map(p=>p.x.toFixed(0)+'%'),[
+    {label:'Cumulative Donation %',data:pts.map(p=>p.y),borderColor:'#00d4aa',backgroundColor:'rgba(255,77,109,0.06)',tension:0.2,fill:true,pointRadius:0,borderWidth:2},
+    {label:'Equal Distribution',data:pts.map(p=>p.x),borderColor:'#2a2a3a',borderDash:[4,4],pointRadius:0,borderWidth:1}
+  ],{scales:{x:{ticks:{maxTicksLimit:8,callback:v=>v}},y:{ticks:{callback:v=>v+'%'}}},plugins:{tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y.toFixed(1)+'%'}}}});
+})();
+
+// Pareto slabs
+(()=>{
+  document.getElementById('ps').innerHTML=DEEP.pareto_survival.map(p=>`
+    <div style="margin-bottom:8px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+        <span style="font-size:12px;font-weight:600;">${p.slab}</span>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">Jan: ${p.jan_count} camps · ${p.jan_pct_of_total.toFixed(1)}% → Feb: ${p.feb_slab_pct.toFixed(1)}%</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <span style="padding:3px 8px;border-radius:4px;font-size:10px;font-family:var(--mono);background:rgba(0,212,170,0.1);color:#00d4aa;border:1px solid rgba(0,212,170,0.2);">✓ Survived ${p.survived_count}</span>
+        <span style="padding:3px 8px;border-radius:4px;font-size:10px;font-family:var(--mono);background:rgba(255,169,64,0.1);color:#ffa940;border:1px solid rgba(255,169,64,0.2);">↓ Dropped ${p.dropped_count}</span>
+        <span style="padding:3px 8px;border-radius:4px;font-size:10px;font-family:var(--mono);background:rgba(255,77,109,0.1);color:#ff4d6d;border:1px solid rgba(255,77,109,0.2);">✕ Zeroed ${p.zeroed_count}</span>
+        <span style="padding:3px 8px;border-radius:4px;font-size:10px;font-family:var(--mono);background:rgba(107,107,133,0.1);color:#6b6b85;border:1px solid rgba(107,107,133,0.2);">+ New ${p.new_entrants}</span>
+      </div>
+    </div>`).join('');
+})();
+
+// Funnel tables
+function fTable(data){
+  if(!data||!data.length) return '<div style="padding:20px;color:var(--muted);font-family:var(--mono);font-size:12px">No data</div>';
+  return `<div style="overflow-x:auto"><table class="dt"><thead><tr><th>Campaign</th><th class="num">Initiated</th><th class="num">Cart</th><th class="num">Ord Created</th><th class="num">Placed</th><th class="num">Init→Placed%</th><th class="num">Donation</th></tr></thead><tbody>`+
+  data.map(r=>{const p=Math.min(parseFloat(r.initiate_to_placed_pct)||0,100),cls=p>50?'up':p>25?'warn':'down';
+    return `<tr><td style="font-weight:500">#${r.campaign_id}</td><td class="num">${fmt(r.contri_initiated,'n')}</td><td class="num">${fmt(r.cart_created,'n')}</td><td class="num">${fmt(r.order_created,'n')}</td><td class="num">${fmt(r.order_placed,'n')}</td><td class="num"><span class="badge ${cls}">${p.toFixed(1)}%</span></td><td class="num">${fmt(r.total_donation,'c')}</td></tr>`;
+  }).join('')+`</tbody></table></div>`;
+}
+document.getElementById('fb').innerHTML=fTable(DEEP.best_funnel);
+document.getElementById('fw').innerHTML=fTable(DEEP.worst_funnel);
+function showFTab(t,btn){document.getElementById('fb').style.display=t==='best'?'block':'none';document.getElementById('fw').style.display=t==='worst'?'block':'none';document.querySelectorAll('.ft').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+
+// Dropper tables
+function dTable(data,cols){
+  if(!data||!data.length) return '<div style="padding:20px;color:var(--muted);font-family:var(--mono);font-size:12px">No campaigns match this criteria.</div>';
+  return `<div style="overflow-x:auto"><table class="dt"><thead><tr>${cols.map(c=>`<th class="${c.n?'num':''}">${c.l}</th>`).join('')}</tr></thead><tbody>${data.map(r=>`<tr>${cols.map(c=>`<td class="${c.n?'num':''}">${c.r(r)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+document.getElementById('dr').innerHTML=dTable(DEEP.relative_drop,[
+  {l:'Campaign',r:r=>`<span style="font-weight:500">#${r.campaign_id}</span>`},
+  {l:'Jan Donation',n:true,r:r=>fmt(r.jan_donation,'c')},
+  {l:'Feb Donation',n:true,r:r=>fmt(r.feb_donation,'c')},
+  {l:'Change',n:true,r:r=>`<span class="badge down">${parseFloat(r.don_change_pct).toFixed(1)}%</span>`},
+]);
+document.getElementById('dd').innerHTML=dTable(DEEP.disappeared,[
+  {l:'Campaign',r:r=>`<span style="font-weight:500">#${r.campaign_id}</span>`},
+  {l:'Jan Donation',n:true,r:r=>fmt(r.jan_donation,'c')},
+  {l:'Feb Donation',n:true,r:r=>fmt(r.feb_donation,'c')},
+  {l:'Change',n:true,r:r=>`<span class="badge ${parseFloat(r.feb_donation)>0?'warn':'down'}">${parseFloat(r.don_change_pct).toFixed(1)}%</span>`},
+]);
+document.getElementById('dz').innerHTML=dTable(DEEP.zeroed_out,[
+  {l:'Campaign',r:r=>`<span style="font-weight:500">#${r.campaign_id}</span>`},
+  {l:'Jan Donation',n:true,r:r=>fmt(r.jan_donation,'c')},
+  {l:'Feb Donation',n:true,r:r=>`<span style="color:#ff4d6d">₹0</span>`},
+  {l:'Status',r:r=>`<span class="badge down">Zero'd Out</span>`},
+]);
+function showDTab(t,btn){['dr','dd','dz'].forEach(id=>document.getElementById(id).style.display='none');document.getElementById(t).style.display='block';document.querySelectorAll('.dt2').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+
+// Conversion root cause
+(()=>{
+  const cd=DEEP.conv_droppers;
+  const fc=DEEP.funnel_compare;
+  const jc=fc.jan.uq_visitor>0?fc.jan.order_placed/fc.jan.uq_visitor*100:0;
+  const fc2=fc.feb.uq_visitor>0?fc.feb.order_placed/fc.feb.uq_visitor*100:0;
+  const impact=cd.reduce((s,r)=>s+parseFloat(r.traffic_impact||0),0);
+  document.getElementById('ci').innerHTML=`Overall conversion: <strong>Jan ${jc.toFixed(2)}% → Feb ${fc2.toFixed(2)}%</strong>. The ${cd.length} campaigns below collectively account for an estimated <strong>${Math.abs(impact).toFixed(0)} lost orders</strong>. Campaigns with high traffic + high conversion drop are highest priority — they move the most volume.`;
+  document.getElementById('cdt').innerHTML=`<thead><tr><th>Campaign</th><th class="num">Jan Conv%</th><th class="num">Feb Conv%</th><th class="num">Δ (pp)</th><th class="num">Feb Visitors</th><th class="num">Lost Orders</th></tr></thead><tbody>`+
+  cd.map(r=>{const d=parseFloat(r.conv_drop)||0,i=parseFloat(r.traffic_impact)||0;
+    return `<tr><td style="font-weight:500">#${r.campaign_id}</td><td class="num">${parseFloat(r.conv_rate_jan).toFixed(2)}%</td><td class="num">${parseFloat(r.conv_rate_feb).toFixed(2)}%</td><td class="num"><span class="badge down">${d.toFixed(2)}pp</span></td><td class="num">${fmt(r.uq_visitor_feb,'n')}</td><td class="num" style="color:#ff4d6d">${Math.abs(i).toFixed(0)}</td></tr>`;
+  }).join('')+`</tbody>`;
+  if(cd.length) mkChart('cdc','bar',cd.map(r=>'#'+r.campaign_id),[
+    {label:'Jan',data:cd.map(r=>parseFloat(r.conv_rate_jan).toFixed(2)),backgroundColor:'rgba(107,107,133,0.5)',borderColor:'#6b6b85',borderWidth:1},
+    {label:'Feb',data:cd.map(r=>parseFloat(r.conv_rate_feb).toFixed(2)),backgroundColor:'rgba(255,77,109,0.5)',borderColor:'#ff4d6d',borderWidth:1},
+  ],{scales:{x:{ticks:{maxRotation:45}},y:{ticks:{callback:v=>v+'%'}}}});
+})();
+</script>
+</body>
+</html>
