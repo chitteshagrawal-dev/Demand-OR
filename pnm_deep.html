@@ -7,7 +7,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
-:root{--bg:#0a0a0f;--surface:#13131a;--surface2:#1c1c26;--border:#2a2a3a;--text:#e8e8f0;--muted:#6b6b85;--accent:#ffa940;--up:#00d4aa;--down:#ff4d6d;--warn:#ffa940;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;}
+:root{--bg:#ffffff;--surface:#f5f5f9;--surface2:#ececf1;--border:#d4d4e0;--text:#1a1a24;--muted:#757595;--accent:#ff4d6d;--up:#008866;--down:#ff4d6d;--warn:#ffa940;--mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;}
 ::-webkit-scrollbar{width:4px;height:4px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
@@ -18,9 +18,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .pt{font-size:15px;font-weight:700;}
 .pp{font-size:11px;color:var(--muted);font-family:var(--mono);margin-left:auto;}
 .content{padding:24px 32px;max-width:1440px;}
-.sh{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;margin-top:28px;}
+.sh{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;margin-top:28px;padding:12px 16px;background:#d8d8e5;border-radius:8px;}
 .sh:first-child{margin-top:0;}
-.st{font-size:10px;font-family:var(--mono);letter-spacing:2px;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+.st{font-size:10px;font-family:var(--mono);letter-spacing:2px;text-transform:uppercase;color:#1a1a24;white-space:nowrap;font-weight:700;}
 .sl{flex:1;height:1px;background:var(--border);}
 .sd{font-size:11px;color:var(--muted);font-family:var(--mono);white-space:nowrap;}
 .g{display:grid;gap:14px;}.g2{grid-template-columns:1fr 1fr;}.g3{grid-template-columns:1fr 1fr 1fr;}.g21{grid-template-columns:2fr 1fr;}.g12{grid-template-columns:1fr 2fr;}
@@ -28,13 +28,19 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .bh{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px;}
 .bt{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px;}.bw{font-size:11px;color:var(--muted);}
 .cw{position:relative;height:200px;}.cw.tall{height:240px;}.cw.short{height:150px;}
+.chart-nav{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-bottom:10px;}
+.chart-nav-right{display:flex;align-items:center;gap:8px;}
+.chart-nav-btn{background:var(--surface);border:1px solid var(--border);color:var(--text);width:32px;height:32px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all 0.2s;font-weight:600;}
+.chart-nav-btn:hover{background:var(--surface2);border-color:var(--accent3);color:var(--accent3);}
+.chart-nav-btn:disabled{opacity:0.4;cursor:not-allowed;}
+.chart-nav-month{font-size:12px;font-family:var(--mono);color:var(--muted);font-weight:500;text-align:right;min-width:80px;}
 .dt{width:100%;border-collapse:collapse;font-size:11px;}
 .dt th{text-align:left;color:var(--muted);font-weight:500;padding:6px 10px;border-bottom:1px solid var(--border);letter-spacing:0.5px;text-transform:uppercase;font-size:10px;font-family:var(--mono);}
-.dt td{padding:7px 10px;border-bottom:1px solid rgba(42,42,58,0.4);font-family:var(--mono);font-size:11px;}
+.dt td{padding:7px 10px;border-bottom:1px solid rgba(212,212,224,0.4);font-family:var(--mono);font-size:11px;}
 .dt tr:hover td{background:var(--surface2);}
 .num{text-align:right;}
 .badge{display:inline-block;padding:2px 7px;border-radius:3px;font-size:10px;font-weight:600;font-family:var(--mono);}
-.up{background:rgba(0,212,170,0.12);color:#00d4aa;}.down{background:rgba(255,77,109,0.12);color:#ff4d6d;}.warn{background:rgba(255,169,64,0.12);color:#ffa940;}.neutral{background:rgba(107,107,133,0.12);color:#6b6b85;}
+.up{background:rgba(0,136,102,0.15);color:#008866;}.down{background:rgba(255,77,109,0.12);color:#ff4d6d;}.warn{background:rgba(255,169,64,0.12);color:#ffa940;}.neutral{background:rgba(107,107,133,0.12);color:#757595;}
 .ib{background:var(--surface2);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:12px 16px;font-size:12px;color:var(--muted);line-height:1.7;margin-bottom:14px;}
 .ib strong{color:var(--text);font-weight:600;}
 .tb{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
@@ -42,7 +48,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .tbtn:hover{color:var(--text);}.tbtn.active{background:var(--accent);border-color:var(--accent);color:white;}
 .tw{position:relative;display:inline-flex;align-items:center;cursor:help;}
 .ti{width:14px;height:14px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);font-size:9px;color:var(--muted);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
-.tb2{display:none;position:absolute;top:22px;left:0;z-index:999;background:#1c1c26;border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:11px;color:var(--muted);font-family:var(--mono);width:280px;line-height:1.6;box-shadow:0 8px 24px rgba(0,0,0,0.6);}
+.tb2{display:none;position:absolute;top:22px;left:0;z-index:999;background:#f5f5f9;border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-size:11px;color:var(--muted);font-family:var(--mono);width:280px;line-height:1.6;box-shadow:0 8px 24px rgba(0,0,0,0.1);}
 .tw:hover .tb2{display:block;}
 </style>
 </head>
@@ -65,7 +71,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
   <div class="sh" style="margin-top:28px"><span class="st">02 — Pareto Survival</span><div class="sl"></div><span class="sd">Which campaigns held their position Jan→Feb?</span></div>
   <div id="pi" class="ib"></div>
   <div class="g g21">
-    <div class="box"><div class="bh"><div><div class="bt">Pareto Curve — Feb 2026</div><div class="bw">Steeper curve = higher donation concentration in fewer campaigns</div></div></div><div class="cw tall"><canvas id="pc"></canvas></div></div>
+    <div class="box"><div class="bh"><div><div class="bt">Pareto Curve — <span id="pcTitle">Feb 2026</span></div><div class="bw">Steeper curve = higher donation concentration in fewer campaigns</div></div><div class="chart-nav-right"><button class="chart-nav-btn" id="pcPrev" onclick="prevParetoMonth()">‹</button><button class="chart-nav-btn" id="pcNext" onclick="nextParetoMonth()">›</button></div></div><div class="cw tall"><canvas id="pc"></canvas></div></div>
     <div class="box"><div class="bh"><div><div class="bt">Slab Migration — Jan → Feb</div><div class="bw">For each slab: survived / dropped / zeroed / new entrants</div></div></div><div id="ps" style="overflow-y:auto;max-height:280px;"></div></div>
   </div>
 
@@ -165,16 +171,49 @@ function mkChart(id,type,labels,datasets,opts){
     `Pareto data loaded.`;
 })();
 
-// Pareto curve
-(()=>{
-  const curve=DEEP.pareto_curve;if(!curve) return;
+// Pareto curve navigation — all months
+const PARETO_ALL_MONTHS = {"2025-08": [{"x": 1.3, "y": 37.16}, {"x": 2.6, "y": 45.2}, {"x": 3.9, "y": 52.98}, {"x": 5.19, "y": 59.84}, {"x": 6.49, "y": 66.56}, {"x": 7.79, "y": 70.93}, {"x": 9.09, "y": 74.9}, {"x": 10.39, "y": 77.95}, {"x": 11.69, "y": 80.58}, {"x": 12.99, "y": 82.67}, {"x": 14.29, "y": 84.45}, {"x": 15.58, "y": 85.92}, {"x": 16.88, "y": 87.21}, {"x": 18.18, "y": 88.26}, {"x": 19.48, "y": 89.29}, {"x": 20.78, "y": 90.16}, {"x": 22.08, "y": 90.98}, {"x": 23.38, "y": 91.75}, {"x": 24.68, "y": 92.51}, {"x": 25.97, "y": 93.2}, {"x": 27.27, "y": 93.85}, {"x": 28.57, "y": 94.42}, {"x": 29.87, "y": 94.87}, {"x": 31.17, "y": 95.3}, {"x": 32.47, "y": 95.71}, {"x": 33.77, "y": 96.1}, {"x": 35.06, "y": 96.46}, {"x": 36.36, "y": 96.81}, {"x": 37.66, "y": 97.16}, {"x": 38.96, "y": 97.51}, {"x": 40.26, "y": 97.75}, {"x": 41.56, "y": 97.94}, {"x": 42.86, "y": 98.1}, {"x": 44.16, "y": 98.26}, {"x": 45.45, "y": 98.42}, {"x": 46.75, "y": 98.58}, {"x": 48.05, "y": 98.73}, {"x": 49.35, "y": 98.84}, {"x": 50.65, "y": 98.95}, {"x": 51.95, "y": 99.07}, {"x": 53.25, "y": 99.16}, {"x": 54.55, "y": 99.24}, {"x": 55.84, "y": 99.32}, {"x": 57.14, "y": 99.39}, {"x": 58.44, "y": 99.45}, {"x": 59.74, "y": 99.51}, {"x": 61.04, "y": 99.56}, {"x": 62.34, "y": 99.61}, {"x": 63.64, "y": 99.64}, {"x": 64.94, "y": 99.67}, {"x": 66.23, "y": 99.71}, {"x": 67.53, "y": 99.74}, {"x": 68.83, "y": 99.77}, {"x": 70.13, "y": 99.79}, {"x": 71.43, "y": 99.81}, {"x": 72.73, "y": 99.83}, {"x": 74.03, "y": 99.84}, {"x": 75.32, "y": 99.86}, {"x": 76.62, "y": 99.88}, {"x": 77.92, "y": 99.89}, {"x": 79.22, "y": 99.9}, {"x": 80.52, "y": 99.91}, {"x": 81.82, "y": 99.92}, {"x": 83.12, "y": 99.93}, {"x": 84.42, "y": 99.94}, {"x": 85.71, "y": 99.95}, {"x": 87.01, "y": 99.96}, {"x": 88.31, "y": 99.97}, {"x": 89.61, "y": 99.98}, {"x": 90.91, "y": 99.99}, {"x": 92.21, "y": 99.99}, {"x": 93.51, "y": 100.0}, {"x": 94.81, "y": 100.0}, {"x": 96.1, "y": 100.0}, {"x": 97.4, "y": 100.0}, {"x": 98.7, "y": 100.0}, {"x": 100.0, "y": 100.0}], "2025-09": [{"x": 1.33, "y": 39.62}, {"x": 2.67, "y": 52.41}, {"x": 4.0, "y": 61.76}, {"x": 5.33, "y": 70.31}, {"x": 6.67, "y": 75.12}, {"x": 8.0, "y": 79.7}, {"x": 9.33, "y": 83.46}, {"x": 10.67, "y": 87.14}, {"x": 12.0, "y": 89.46}, {"x": 13.33, "y": 91.25}, {"x": 14.67, "y": 92.36}, {"x": 16.0, "y": 93.41}, {"x": 17.33, "y": 94.26}, {"x": 18.67, "y": 95.08}, {"x": 20.0, "y": 95.62}, {"x": 21.33, "y": 96.08}, {"x": 22.67, "y": 96.52}, {"x": 24.0, "y": 96.94}, {"x": 25.33, "y": 97.22}, {"x": 26.67, "y": 97.48}, {"x": 28.0, "y": 97.74}, {"x": 29.33, "y": 97.96}, {"x": 30.67, "y": 98.19}, {"x": 32.0, "y": 98.37}, {"x": 33.33, "y": 98.52}, {"x": 34.67, "y": 98.66}, {"x": 36.0, "y": 98.77}, {"x": 37.33, "y": 98.87}, {"x": 38.67, "y": 98.95}, {"x": 40.0, "y": 99.04}, {"x": 41.33, "y": 99.11}, {"x": 42.67, "y": 99.19}, {"x": 44.0, "y": 99.25}, {"x": 45.33, "y": 99.31}, {"x": 46.67, "y": 99.37}, {"x": 48.0, "y": 99.41}, {"x": 49.33, "y": 99.45}, {"x": 50.67, "y": 99.5}, {"x": 52.0, "y": 99.53}, {"x": 53.33, "y": 99.57}, {"x": 54.67, "y": 99.61}, {"x": 56.0, "y": 99.64}, {"x": 57.33, "y": 99.68}, {"x": 58.67, "y": 99.71}, {"x": 60.0, "y": 99.74}, {"x": 61.33, "y": 99.76}, {"x": 62.67, "y": 99.79}, {"x": 64.0, "y": 99.81}, {"x": 65.33, "y": 99.83}, {"x": 66.67, "y": 99.85}, {"x": 68.0, "y": 99.87}, {"x": 69.33, "y": 99.88}, {"x": 70.67, "y": 99.9}, {"x": 72.0, "y": 99.91}, {"x": 73.33, "y": 99.93}, {"x": 74.67, "y": 99.94}, {"x": 76.0, "y": 99.95}, {"x": 77.33, "y": 99.96}, {"x": 78.67, "y": 99.97}, {"x": 80.0, "y": 99.97}, {"x": 81.33, "y": 99.98}, {"x": 82.67, "y": 99.98}, {"x": 84.0, "y": 99.99}, {"x": 85.33, "y": 99.99}, {"x": 86.67, "y": 99.99}, {"x": 88.0, "y": 100.0}, {"x": 89.33, "y": 100.0}, {"x": 90.67, "y": 100.0}, {"x": 92.0, "y": 100.0}, {"x": 93.33, "y": 100.0}, {"x": 94.67, "y": 100.0}, {"x": 96.0, "y": 100.0}, {"x": 97.33, "y": 100.0}, {"x": 98.67, "y": 100.0}, {"x": 100.0, "y": 100.0}], "2025-10": [{"x": 1.33, "y": 45.56}, {"x": 2.67, "y": 66.74}, {"x": 4.0, "y": 74.54}, {"x": 5.33, "y": 78.12}, {"x": 6.67, "y": 81.58}, {"x": 8.0, "y": 84.01}, {"x": 9.33, "y": 86.21}, {"x": 10.67, "y": 87.62}, {"x": 12.0, "y": 88.42}, {"x": 13.33, "y": 89.2}, {"x": 14.67, "y": 89.95}, {"x": 16.0, "y": 90.71}, {"x": 17.33, "y": 91.44}, {"x": 18.67, "y": 92.1}, {"x": 20.0, "y": 92.69}, {"x": 21.33, "y": 93.24}, {"x": 22.67, "y": 93.76}, {"x": 24.0, "y": 94.27}, {"x": 25.33, "y": 94.69}, {"x": 26.67, "y": 95.08}, {"x": 28.0, "y": 95.47}, {"x": 29.33, "y": 95.83}, {"x": 30.67, "y": 96.17}, {"x": 32.0, "y": 96.49}, {"x": 33.33, "y": 96.8}, {"x": 34.67, "y": 97.11}, {"x": 36.0, "y": 97.34}, {"x": 37.33, "y": 97.55}, {"x": 38.67, "y": 97.76}, {"x": 40.0, "y": 97.96}, {"x": 41.33, "y": 98.14}, {"x": 42.67, "y": 98.32}, {"x": 44.0, "y": 98.48}, {"x": 45.33, "y": 98.64}, {"x": 46.67, "y": 98.76}, {"x": 48.0, "y": 98.89}, {"x": 49.33, "y": 99.01}, {"x": 50.67, "y": 99.12}, {"x": 52.0, "y": 99.21}, {"x": 53.33, "y": 99.29}, {"x": 54.67, "y": 99.35}, {"x": 56.0, "y": 99.41}, {"x": 57.33, "y": 99.46}, {"x": 58.67, "y": 99.51}, {"x": 60.0, "y": 99.55}, {"x": 61.33, "y": 99.59}, {"x": 62.67, "y": 99.63}, {"x": 64.0, "y": 99.67}, {"x": 65.33, "y": 99.71}, {"x": 66.67, "y": 99.74}, {"x": 68.0, "y": 99.76}, {"x": 69.33, "y": 99.78}, {"x": 70.67, "y": 99.8}, {"x": 72.0, "y": 99.82}, {"x": 73.33, "y": 99.84}, {"x": 74.67, "y": 99.86}, {"x": 76.0, "y": 99.88}, {"x": 77.33, "y": 99.9}, {"x": 78.67, "y": 99.91}, {"x": 80.0, "y": 99.92}, {"x": 81.33, "y": 99.93}, {"x": 82.67, "y": 99.94}, {"x": 84.0, "y": 99.95}, {"x": 85.33, "y": 99.96}, {"x": 86.67, "y": 99.97}, {"x": 88.0, "y": 99.97}, {"x": 89.33, "y": 99.98}, {"x": 90.67, "y": 99.99}, {"x": 92.0, "y": 99.99}, {"x": 93.33, "y": 99.99}, {"x": 94.67, "y": 100.0}, {"x": 96.0, "y": 100.0}, {"x": 97.33, "y": 100.0}, {"x": 98.67, "y": 100.0}, {"x": 100.0, "y": 100.0}], "2025-11": [{"x": 1.56, "y": 23.74}, {"x": 3.12, "y": 43.95}, {"x": 4.69, "y": 62.81}, {"x": 6.25, "y": 69.61}, {"x": 7.81, "y": 73.04}, {"x": 9.38, "y": 75.96}, {"x": 10.94, "y": 78.72}, {"x": 12.5, "y": 81.39}, {"x": 14.06, "y": 84.04}, {"x": 15.62, "y": 86.26}, {"x": 17.19, "y": 88.3}, {"x": 18.75, "y": 89.93}, {"x": 20.31, "y": 91.3}, {"x": 21.88, "y": 92.67}, {"x": 23.44, "y": 93.77}, {"x": 25.0, "y": 94.7}, {"x": 26.56, "y": 95.4}, {"x": 28.12, "y": 95.87}, {"x": 29.69, "y": 96.29}, {"x": 31.25, "y": 96.69}, {"x": 32.81, "y": 97.09}, {"x": 34.38, "y": 97.47}, {"x": 35.94, "y": 97.75}, {"x": 37.5, "y": 97.99}, {"x": 39.06, "y": 98.21}, {"x": 40.62, "y": 98.4}, {"x": 42.19, "y": 98.59}, {"x": 43.75, "y": 98.76}, {"x": 45.31, "y": 98.9}, {"x": 46.88, "y": 99.04}, {"x": 48.44, "y": 99.14}, {"x": 50.0, "y": 99.24}, {"x": 51.56, "y": 99.33}, {"x": 53.12, "y": 99.42}, {"x": 54.69, "y": 99.51}, {"x": 56.25, "y": 99.59}, {"x": 57.81, "y": 99.65}, {"x": 59.38, "y": 99.7}, {"x": 60.94, "y": 99.74}, {"x": 62.5, "y": 99.78}, {"x": 64.06, "y": 99.82}, {"x": 65.62, "y": 99.84}, {"x": 67.19, "y": 99.86}, {"x": 68.75, "y": 99.88}, {"x": 70.31, "y": 99.9}, {"x": 71.88, "y": 99.92}, {"x": 73.44, "y": 99.93}, {"x": 75.0, "y": 99.95}, {"x": 76.56, "y": 99.95}, {"x": 78.12, "y": 99.96}, {"x": 79.69, "y": 99.97}, {"x": 81.25, "y": 99.97}, {"x": 82.81, "y": 99.98}, {"x": 84.38, "y": 99.98}, {"x": 85.94, "y": 99.99}, {"x": 87.5, "y": 99.99}, {"x": 89.06, "y": 99.99}, {"x": 90.62, "y": 100.0}, {"x": 92.19, "y": 100.0}, {"x": 93.75, "y": 100.0}, {"x": 95.31, "y": 100.0}, {"x": 96.88, "y": 100.0}, {"x": 98.44, "y": 100.0}, {"x": 100.0, "y": 100.0}], "2025-12": [{"x": 1.49, "y": 45.01}, {"x": 2.99, "y": 60.96}, {"x": 4.48, "y": 67.21}, {"x": 5.97, "y": 71.36}, {"x": 7.46, "y": 75.35}, {"x": 8.96, "y": 79.04}, {"x": 10.45, "y": 81.73}, {"x": 11.94, "y": 84.12}, {"x": 13.43, "y": 85.48}, {"x": 14.93, "y": 86.68}, {"x": 16.42, "y": 87.83}, {"x": 17.91, "y": 88.85}, {"x": 19.4, "y": 89.86}, {"x": 20.9, "y": 90.81}, {"x": 22.39, "y": 91.66}, {"x": 23.88, "y": 92.47}, {"x": 25.37, "y": 93.17}, {"x": 26.87, "y": 93.73}, {"x": 28.36, "y": 94.28}, {"x": 29.85, "y": 94.81}, {"x": 31.34, "y": 95.32}, {"x": 32.84, "y": 95.74}, {"x": 34.33, "y": 96.13}, {"x": 35.82, "y": 96.5}, {"x": 37.31, "y": 96.85}, {"x": 38.81, "y": 97.16}, {"x": 40.3, "y": 97.46}, {"x": 41.79, "y": 97.76}, {"x": 43.28, "y": 97.99}, {"x": 44.78, "y": 98.22}, {"x": 46.27, "y": 98.41}, {"x": 47.76, "y": 98.6}, {"x": 49.25, "y": 98.77}, {"x": 50.75, "y": 98.9}, {"x": 52.24, "y": 99.01}, {"x": 53.73, "y": 99.12}, {"x": 55.22, "y": 99.22}, {"x": 56.72, "y": 99.31}, {"x": 58.21, "y": 99.4}, {"x": 59.7, "y": 99.47}, {"x": 61.19, "y": 99.55}, {"x": 62.69, "y": 99.62}, {"x": 64.18, "y": 99.68}, {"x": 65.67, "y": 99.73}, {"x": 67.16, "y": 99.78}, {"x": 68.66, "y": 99.82}, {"x": 70.15, "y": 99.85}, {"x": 71.64, "y": 99.87}, {"x": 73.13, "y": 99.89}, {"x": 74.63, "y": 99.91}, {"x": 76.12, "y": 99.92}, {"x": 77.61, "y": 99.93}, {"x": 79.1, "y": 99.94}, {"x": 80.6, "y": 99.95}, {"x": 82.09, "y": 99.96}, {"x": 83.58, "y": 99.97}, {"x": 85.07, "y": 99.97}, {"x": 86.57, "y": 99.98}, {"x": 88.06, "y": 99.98}, {"x": 89.55, "y": 99.99}, {"x": 91.04, "y": 99.99}, {"x": 92.54, "y": 99.99}, {"x": 94.03, "y": 100.0}, {"x": 95.52, "y": 100.0}, {"x": 97.01, "y": 100.0}, {"x": 98.51, "y": 100.0}, {"x": 100.0, "y": 100.0}], "2026-01": [{"x": 1.56, "y": 33.68}, {"x": 3.12, "y": 48.67}, {"x": 4.69, "y": 60.96}, {"x": 6.25, "y": 68.59}, {"x": 7.81, "y": 74.38}, {"x": 9.38, "y": 79.6}, {"x": 10.94, "y": 83.78}, {"x": 12.5, "y": 87.61}, {"x": 14.06, "y": 89.92}, {"x": 15.62, "y": 91.23}, {"x": 17.19, "y": 92.16}, {"x": 18.75, "y": 93.07}, {"x": 20.31, "y": 93.88}, {"x": 21.88, "y": 94.36}, {"x": 23.44, "y": 94.83}, {"x": 25.0, "y": 95.29}, {"x": 26.56, "y": 95.73}, {"x": 28.12, "y": 96.12}, {"x": 29.69, "y": 96.51}, {"x": 31.25, "y": 96.88}, {"x": 32.81, "y": 97.16}, {"x": 34.38, "y": 97.42}, {"x": 35.94, "y": 97.65}, {"x": 37.5, "y": 97.85}, {"x": 39.06, "y": 98.05}, {"x": 40.62, "y": 98.24}, {"x": 42.19, "y": 98.43}, {"x": 43.75, "y": 98.61}, {"x": 45.31, "y": 98.8}, {"x": 46.88, "y": 98.93}, {"x": 48.44, "y": 99.06}, {"x": 50.0, "y": 99.16}, {"x": 51.56, "y": 99.23}, {"x": 53.12, "y": 99.31}, {"x": 54.69, "y": 99.38}, {"x": 56.25, "y": 99.43}, {"x": 57.81, "y": 99.48}, {"x": 59.38, "y": 99.53}, {"x": 60.94, "y": 99.57}, {"x": 62.5, "y": 99.62}, {"x": 64.06, "y": 99.66}, {"x": 65.62, "y": 99.7}, {"x": 67.19, "y": 99.73}, {"x": 68.75, "y": 99.75}, {"x": 70.31, "y": 99.78}, {"x": 71.88, "y": 99.8}, {"x": 73.44, "y": 99.82}, {"x": 75.0, "y": 99.84}, {"x": 76.56, "y": 99.85}, {"x": 78.12, "y": 99.87}, {"x": 79.69, "y": 99.89}, {"x": 81.25, "y": 99.91}, {"x": 82.81, "y": 99.93}, {"x": 84.38, "y": 99.94}, {"x": 85.94, "y": 99.95}, {"x": 87.5, "y": 99.96}, {"x": 89.06, "y": 99.97}, {"x": 90.62, "y": 99.98}, {"x": 92.19, "y": 99.98}, {"x": 93.75, "y": 99.99}, {"x": 95.31, "y": 99.99}, {"x": 96.88, "y": 100.0}, {"x": 98.44, "y": 100.0}, {"x": 100.0, "y": 100.0}], "2026-02": [{"x": 1.89, "y": 24.09}, {"x": 3.77, "y": 37.15}, {"x": 5.66, "y": 46.82}, {"x": 7.55, "y": 55.44}, {"x": 9.43, "y": 63.88}, {"x": 11.32, "y": 69.29}, {"x": 13.21, "y": 73.52}, {"x": 15.09, "y": 77.11}, {"x": 16.98, "y": 80.02}, {"x": 18.87, "y": 82.62}, {"x": 20.75, "y": 85.08}, {"x": 22.64, "y": 87.17}, {"x": 24.53, "y": 89.0}, {"x": 26.42, "y": 90.67}, {"x": 28.3, "y": 91.96}, {"x": 30.19, "y": 93.06}, {"x": 32.08, "y": 93.93}, {"x": 33.96, "y": 94.71}, {"x": 35.85, "y": 95.44}, {"x": 37.74, "y": 96.15}, {"x": 39.62, "y": 96.73}, {"x": 41.51, "y": 97.29}, {"x": 43.4, "y": 97.74}, {"x": 45.28, "y": 98.03}, {"x": 47.17, "y": 98.29}, {"x": 49.06, "y": 98.48}, {"x": 50.94, "y": 98.66}, {"x": 52.83, "y": 98.82}, {"x": 54.72, "y": 98.97}, {"x": 56.6, "y": 99.1}, {"x": 58.49, "y": 99.21}, {"x": 60.38, "y": 99.32}, {"x": 62.26, "y": 99.42}, {"x": 64.15, "y": 99.51}, {"x": 66.04, "y": 99.58}, {"x": 67.92, "y": 99.65}, {"x": 69.81, "y": 99.73}, {"x": 71.7, "y": 99.79}, {"x": 73.58, "y": 99.84}, {"x": 75.47, "y": 99.87}, {"x": 77.36, "y": 99.9}, {"x": 79.25, "y": 99.91}, {"x": 81.13, "y": 99.93}, {"x": 83.02, "y": 99.94}, {"x": 84.91, "y": 99.95}, {"x": 86.79, "y": 99.96}, {"x": 88.68, "y": 99.97}, {"x": 90.57, "y": 99.98}, {"x": 92.45, "y": 99.99}, {"x": 94.34, "y": 100.0}, {"x": 96.23, "y": 100.0}, {"x": 98.11, "y": 100.0}, {"x": 100.0, "y": 100.0}]};
+let paretoMonthIdx = MAIN.months.length - 1;
+const months = MAIN.months;
+const monthLabels = ['Aug 25','Sep 25','Oct 25','Nov 25','Dec 25','Jan 26','Feb 26'];
+
+function updateParetoChart(){
+  const months=MAIN.months;
+  const monthKey = months[paretoMonthIdx];
+  const curve = PARETO_ALL_MONTHS[monthKey] || DEEP.pareto_curve;
+  if(!curve) return;
   const step=Math.max(1,Math.floor(curve.length/80));
   const pts=curve.filter((_,i)=>i%step===0);
+  
+  // Update title
+  document.getElementById('pcTitle').textContent = monthLabels[paretoMonthIdx] + ' ' + (months[paretoMonthIdx].includes('08')?'2025':'2026');
+  
+  // Update button states
+  document.getElementById('pcPrev').disabled = paretoMonthIdx <= 1;
+  document.getElementById('pcNext').disabled = paretoMonthIdx >= months.length - 1;
+  
   mkChart('pc','line',pts.map(p=>p.x.toFixed(0)+'%'),[
-    {label:'Cumulative Donation %',data:pts.map(p=>p.y),borderColor:'#ffa940',backgroundColor:'rgba(255,77,109,0.06)',tension:0.2,fill:true,pointRadius:0,borderWidth:2},
+    {label:'Cumulative Donation %',data:pts.map(p=>p.y),borderColor:'#008866',backgroundColor:'rgba(255,77,109,0.06)',tension:0.2,fill:true,pointRadius:0,borderWidth:2},
     {label:'Equal Distribution',data:pts.map(p=>p.x),borderColor:'#2a2a3a',borderDash:[4,4],pointRadius:0,borderWidth:1}
   ],{scales:{x:{ticks:{maxTicksLimit:8,callback:v=>v}},y:{ticks:{callback:v=>v+'%'}}},plugins:{tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y.toFixed(1)+'%'}}}});
-})();
+}
+
+function prevParetoMonth(){
+  if(paretoMonthIdx > 1) {
+    paretoMonthIdx--;
+    updateParetoChart();
+  }
+}
+
+function nextParetoMonth(){
+  if(paretoMonthIdx < months.length - 1) {
+    paretoMonthIdx++;
+    updateParetoChart();
+  }
+}
+
+// Initialize
+updateParetoChart();
 
 // Pareto slabs
 (()=>{
@@ -185,7 +224,7 @@ function mkChart(id,type,labels,datasets,opts){
         <span style="font-family:var(--mono);font-size:10px;color:var(--muted)">Jan: ${p.jan_count} camps · ${p.jan_pct_of_total.toFixed(1)}% → Feb: ${p.feb_slab_pct.toFixed(1)}%</span>
       </div>
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
-        <span style="padding:3px 8px;border-radius:4px;font-size:10px;font-family:var(--mono);background:rgba(0,212,170,0.1);color:#00d4aa;border:1px solid rgba(0,212,170,0.2);">✓ Survived ${p.survived_count}</span>
+        <span style="padding:3px 8px;border-radius:4px;font-size:10px;font-family:var(--mono);background:rgba(0,136,102,0.15);color:#008866;border:1px solid rgba(0,136,102,0.3);">✓ Survived ${p.survived_count}</span>
         <span style="padding:3px 8px;border-radius:4px;font-size:10px;font-family:var(--mono);background:rgba(255,169,64,0.1);color:#ffa940;border:1px solid rgba(255,169,64,0.2);">↓ Dropped ${p.dropped_count}</span>
         <span style="padding:3px 8px;border-radius:4px;font-size:10px;font-family:var(--mono);background:rgba(255,77,109,0.1);color:#ff4d6d;border:1px solid rgba(255,77,109,0.2);">✕ Zeroed ${p.zeroed_count}</span>
         <span style="padding:3px 8px;border-radius:4px;font-size:10px;font-family:var(--mono);background:rgba(107,107,133,0.1);color:#6b6b85;border:1px solid rgba(107,107,133,0.2);">+ New ${p.new_entrants}</span>

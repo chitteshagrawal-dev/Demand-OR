@@ -9,10 +9,10 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
 :root{
-  --bg:#0a0a0f;--surface:#13131a;--surface2:#1c1c26;--border:#2a2a3a;
-  --text:#e8e8f0;--muted:#6b6b85;
-  --accent:#ff4d6d;--accent2:#00d4aa;--accent3:#7c6fcd;
-  --up:#00d4aa;--down:#ff4d6d;--warn:#ffa940;
+  --bg:#ffffff;--surface:#f5f5f9;--surface2:#ececf1;--border:#d4d4e0;
+  --text:#1a1a24;--muted:#757595;
+  --accent:#ff4d6d;--accent2:#008866;--accent3:#7c6fcd;
+  --up:#008866;--down:#ff4d6d;--warn:#ffa940;
   --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -26,11 +26,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .badge-sm{font-family:var(--mono);font-size:10px;color:var(--muted);background:var(--surface);border:1px solid var(--border);padding:4px 10px;border-radius:4px;}
 
 .upload-panel{padding:16px 32px;background:var(--surface);border-bottom:1px solid var(--border);}
-.up-title{font-size:10px;font-family:var(--mono);color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;}
+.up-title{font-size:10px;font-family:var(--mono);color:var(--text);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px;padding:12px 14px;background:#d5d5e0;border-radius:6px;font-weight:600;}
 .up-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
 .up-slot{border:1px dashed var(--border);border-radius:8px;padding:10px 12px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden;}
 .up-slot:hover{border-color:var(--accent3);background:rgba(124,111,205,0.05);}
-.up-slot.loaded{border-color:var(--up);border-style:solid;background:rgba(0,212,170,0.04);}
+.up-slot.loaded{border-color:var(--up);border-style:solid;background:rgba(0,136,102,0.08);}
 .up-slot input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
 .up-icon{font-size:16px;margin-bottom:5px;}
 .up-lbl{font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:3px;}
@@ -53,9 +53,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .content{padding:24px 32px;max-width:1600px;}
 .cat-panel{display:none;}.cat-panel.active{display:block;}
 
-.sh{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;margin-top:28px;}
+.sh{display:flex;align-items:baseline;gap:12px;margin-bottom:14px;margin-top:28px;padding:12px 16px;background:#d8d8e5;border-radius:8px;}
 .sh:first-child{margin-top:0;}
-.st{font-size:10px;font-family:var(--mono);letter-spacing:2px;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+.st{font-size:10px;font-family:var(--mono);letter-spacing:2px;text-transform:uppercase;color:#1a1a24;white-space:nowrap;font-weight:700;}
 .sl{flex:1;height:1px;background:var(--border);}
 .sd{font-size:11px;color:var(--muted);font-family:var(--mono);}
 
@@ -67,7 +67,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .deep-link:hover{background:rgba(124,111,205,0.1);}
 
 .kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:10px;}
-.kpi{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;position:relative;overflow:hidden;transition:border-color 0.2s;}
+.kpi{background:#e8e8f0;border:1px solid var(--border);border-radius:10px;padding:14px;position:relative;overflow:hidden;transition:border-color 0.2s;}
 .kpi:hover{border-color:var(--accent3);}
 .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
 .kpi.up::before{background:var(--up);}.kpi.down::before{background:var(--down);}.kpi.neutral::before{background:var(--accent3);}
@@ -81,7 +81,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 
 .anom{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap;}
 .apill{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 11px;font-size:11px;font-family:var(--mono);color:var(--muted);}
-.apill.warn{border-color:rgba(255,169,64,0.4);color:var(--warn);}.apill.good{border-color:rgba(0,212,170,0.4);color:var(--up);}.apill.bad{border-color:rgba(255,77,109,0.4);color:var(--down);}
+.apill.warn{border-color:rgba(255,169,64,0.4);color:var(--warn);}.apill.good{border-color:rgba(0,136,102,0.4);color:var(--up);}.apill.bad{border-color:rgba(255,77,109,0.4);color:var(--down);}
 
 .cg{display:grid;gap:14px;}.cg2{grid-template-columns:1fr 1fr;}.cg3{grid-template-columns:1fr 1fr 1fr;}.cg21{grid-template-columns:2fr 1fr;}.cg12{grid-template-columns:1fr 2fr;}
 .box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px;}
@@ -97,10 +97,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 
 .dt{width:100%;border-collapse:collapse;font-size:11px;}
 .dt th{text-align:left;color:var(--muted);font-weight:500;padding:6px 10px;border-bottom:1px solid var(--border);letter-spacing:0.5px;text-transform:uppercase;font-size:10px;font-family:var(--mono);}
-.dt td{padding:7px 10px;border-bottom:1px solid rgba(42,42,58,0.4);font-family:var(--mono);}
+.dt td{padding:7px 10px;border-bottom:1px solid rgba(212,212,224,0.4);font-family:var(--mono);}
 .dt tr:hover td{background:var(--surface2);}.num{text-align:right;}
 .bdg{display:inline-block;padding:2px 7px;border-radius:3px;font-size:10px;font-weight:600;font-family:var(--mono);}
-.bdg.up{background:rgba(0,212,170,0.12);color:var(--up);}.bdg.down{background:rgba(255,77,109,0.12);color:var(--down);}.bdg.warn{background:rgba(255,169,64,0.12);color:var(--warn);}
+.bdg.up{background:rgba(0,136,102,0.15);color:var(--up);}.bdg.down{background:rgba(255,77,109,0.12);color:var(--down);}.bdg.warn{background:rgba(255,169,64,0.12);color:var(--warn);}
 
 .off-mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
 .off-item{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:10px 12px;}
@@ -112,11 +112,19 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .act::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:10px 0 0 10px;}
 .act.high::before{background:var(--down);}.act.medium::before{background:var(--warn);}.act.low::before{background:var(--up);}
 .act-pri{font-size:9px;font-family:var(--mono);font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:7px;}
-.act.high .act-pri{color:var(--down);}.act.medium .act-pri{color:var(--warn);}.act.low .act-pri{color:var(--up);}
+.act.high .act-pri{color:var(--down);}.act.medium .act-pri{color:#c97d2a;}.act.low .act-pri{color:var(--up);}
 .act-title{font-size:13px;font-weight:600;margin-bottom:6px;line-height:1.3;}
 .act-body{font-size:11px;color:var(--muted);line-height:1.6;font-family:var(--mono);}
 .act-metric{margin-top:9px;font-size:10px;font-family:var(--mono);color:var(--muted);}
 .act-metric span{color:var(--text);font-weight:600;}
+
+.accordion{border:1px solid var(--border);border-radius:8px;margin-bottom:20px;background:var(--surface);}
+.accordion-header{padding:14px 16px;background:#d5d5e0;cursor:pointer;display:flex;align-items:center;gap:12px;font-weight:600;color:var(--text);user-select:none;transition:all 0.2s;}
+.accordion-header:hover{background:#cfcfd8;}
+.accordion-toggle{width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:12px;transition:transform 0.3s;flex-shrink:0;}
+.accordion-toggle.open{transform:rotate(180deg);}
+.accordion-content{max-height:0;overflow:hidden;transition:max-height 0.3s ease-out;}
+.accordion-content.open{max-height:500px;transition:max-height 0.3s ease-in;padding:16px;border-top:1px solid var(--border);}
 </style>
 </head>
 <body>
@@ -129,16 +137,21 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
   </div>
 </div>
 
-<div class="upload-panel">
-  <div class="up-title">Data Sources — Upload to refresh</div>
-  <div class="up-grid">
-    <div class="up-slot loaded"><input type="file" accept=".xlsx,.xls,.csv" onchange="handleUpload(event,'agg')"><div class="up-icon">📊</div><span class="up-lbl">Aggregate File</span><div class="up-status">Demand_OR_Monthly_Review</div><div class="vtag">Feb 2026 loaded</div></div>
-    <div class="up-slot loaded"><input type="file" accept=".xlsx,.xls,.csv" multiple onchange="handleUpload(event,'pm')"><div class="up-icon">🏥</div><span class="up-lbl">Personal Medical Raw</span><div class="up-status">4 files · 468K rows</div><div class="vtag">Aug25–Feb26</div></div>
-    <div class="up-slot loaded"><input type="file" accept=".xlsx,.xls,.csv" multiple onchange="handleUpload(event,'pnm')"><div class="up-icon">🤝</div><span class="up-lbl">Personal Non-Medical Raw</span><div class="up-status">3 files · 190K rows</div><div class="vtag">Aug25–Feb26</div></div>
-    <div class="up-slot loaded"><input type="file" accept=".xlsx,.xls,.csv" multiple onchange="handleUpload(event,'nm')"><div class="up-icon">🏦</div><span class="up-lbl">NGO Medical Raw</span><div class="up-status">1 file · 46K rows</div><div class="vtag">Aug25–Feb26</div></div>
-    <div class="up-slot loaded"><input type="file" accept=".xlsx,.xls,.csv" multiple onchange="handleUpload(event,'nnm')"><div class="up-icon">🌿</div><span class="up-lbl">NGO Non-Medical Raw</span><div class="up-status">2 files · 246K rows</div><div class="vtag">Aug25–Feb26</div></div>
+<div class="accordion" id="uploadAccordion">
+  <div class="accordion-header" onclick="toggleAccordion(event)">
+    <span class="accordion-toggle" id="uploadToggle">▼</span>
+    <span>Data Sources — Upload to refresh</span>
   </div>
-  <div class="dq-bar"><div class="dq-dot"></div><span>All files loaded · No duplicate months · Aggregate vs Raw cross-check passed · Aug 2025 baseline</span></div>
+  <div class="accordion-content" id="uploadContent">
+    <div class="up-grid">
+      <div class="up-slot loaded"><input type="file" accept=".xlsx,.xls,.csv" onchange="handleUpload(event,'agg')"><div class="up-icon">📊</div><span class="up-lbl">Aggregate File</span><div class="up-status">Demand_OR_Monthly_Review</div><div class="vtag">Feb 2026 loaded</div></div>
+      <div class="up-slot loaded"><input type="file" accept=".xlsx,.xls,.csv" multiple onchange="handleUpload(event,'pm')"><div class="up-icon">🏥</div><span class="up-lbl">Personal Medical Raw</span><div class="up-status">4 files · 468K rows</div><div class="vtag">Aug25–Feb26</div></div>
+      <div class="up-slot loaded"><input type="file" accept=".xlsx,.xls,.csv" multiple onchange="handleUpload(event,'pnm')"><div class="up-icon">🤝</div><span class="up-lbl">Personal Non-Medical Raw</span><div class="up-status">3 files · 190K rows</div><div class="vtag">Aug25–Feb26</div></div>
+      <div class="up-slot loaded"><input type="file" accept=".xlsx,.xls,.csv" multiple onchange="handleUpload(event,'nm')"><div class="up-icon">🏦</div><span class="up-lbl">NGO Medical Raw</span><div class="up-status">1 file · 46K rows</div><div class="vtag">Aug25–Feb26</div></div>
+      <div class="up-slot loaded"><input type="file" accept=".xlsx,.xls,.csv" multiple onchange="handleUpload(event,'nnm')"><div class="up-icon">🌿</div><span class="up-lbl">NGO Non-Medical Raw</span><div class="up-status">2 files · 246K rows</div><div class="vtag">Aug25–Feb26</div></div>
+    </div>
+    <div class="dq-bar"><div class="dq-dot"></div><span>All files loaded · No duplicate months · Aggregate vs Raw cross-check passed · Aug 2025 baseline</span></div>
+  </div>
 </div>
 
 <div class="tabs-wrap">
@@ -173,7 +186,7 @@ function mkChart(id,type,labels,datasets,opts){
   const el=document.getElementById(id);if(!el)return;
   if(CHARTS[id])CHARTS[id].destroy();
   function m(t,s){for(const k in s){if(s[k]&&typeof s[k]==='object'&&!Array.isArray(s[k])){t[k]=t[k]||{};m(t[k],s[k]);}else t[k]=s[k];}return t;}
-  const base={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:datasets.length>1,labels:{color:'#6b6b85',font:{family:'DM Mono',size:10},boxWidth:10,padding:10}},tooltip:{backgroundColor:'#1c1c26',titleColor:'#e8e8f0',bodyColor:'#6b6b85',borderColor:'#2a2a3a',borderWidth:1,titleFont:{family:'DM Mono',size:11},bodyFont:{family:'DM Mono',size:10}}},scales:{x:{grid:{color:'#1c1c26'},ticks:{color:'#6b6b85',font:{family:'DM Mono',size:10}}},y:{grid:{color:'#1c1c26'},ticks:{color:'#6b6b85',font:{family:'DM Mono',size:10}}}}};
+  const base={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:datasets.length>1,labels:{color:'#757595',font:{family:'DM Mono',size:10},boxWidth:10,padding:10}},tooltip:{backgroundColor:'#f5f5f9',titleColor:'#1a1a24',bodyColor:'#757595',borderColor:'#d4d4e0',borderWidth:1,titleFont:{family:'DM Mono',size:11},bodyFont:{family:'DM Mono',size:10}}},scales:{x:{grid:{color:'#ececf1'},ticks:{color:'#757595',font:{family:'DM Mono',size:10}}},y:{grid:{color:'#ececf1'},ticks:{color:'#757595',font:{family:'DM Mono',size:10}}}}};
   CHARTS[id]=new Chart(el,{type,data:{labels,datasets},options:m(base,opts||{})});
 }
 
@@ -311,10 +324,10 @@ function renderCharts(id){
   const d=RAW[cat];
   const months=d.months;
   const labels=ML.slice(-months.length);
-  const C={a:'#ff4d6d',a2:'#00d4aa',a3:'#7c6fcd',w:'#ffa940',m:'#6b6b85'};
+  const C={a:'#ff4d6d',a2:'#008866',a3:'#7c6fcd',w:'#ffa940',m:'#757595'};
   
   mkChart(`ch-${id}-do`,'line',labels,[
-    {label:'Donation (₹)',data:d.donation,borderColor:C.a2,backgroundColor:'rgba(0,212,170,0.06)',tension:0.4,yAxisID:'y',fill:true,pointRadius:3},
+    {label:'Donation (₹)',data:d.donation,borderColor:C.a2,backgroundColor:'rgba(0,136,102,0.1)',tension:0.4,yAxisID:'y',fill:true,pointRadius:3},
     {label:'Orders',data:d.orders,borderColor:C.a3,tension:0.4,yAxisID:'y1',borderDash:[4,3],pointRadius:3,fill:false},
   ],{scales:{y:{ticks:{callback:v=>v>=1e5?'₹'+(v/1e5).toFixed(0)+'L':'₹'+(v/1000).toFixed(0)+'K'}},y1:{position:'right',grid:{display:false},ticks:{color:C.a3,callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v}}}});
 
@@ -335,7 +348,7 @@ function renderCharts(id){
 
   mkChart(`ch-${id}-camp`,'bar',labels,[
     {label:'Live',data:d.campaigns_live,backgroundColor:'rgba(42,42,58,0.8)',borderColor:C.m,borderWidth:1,yAxisID:'y'},
-    {label:'Raised',data:d.campaigns_raised,backgroundColor:'rgba(0,212,170,0.4)',borderColor:C.a2,borderWidth:1,yAxisID:'y'},
+    {label:'Raised',data:d.campaigns_raised,backgroundColor:'rgba(0,136,102,0.2)',borderColor:C.a2,borderWidth:1,yAxisID:'y'},
     {label:'Raised/Live%',data:d.raised_live_pct.map(v=>+(v*100).toFixed(1)),type:'line',borderColor:C.w,tension:0.4,pointRadius:3,fill:false,yAxisID:'y1'},
   ],{scales:{y:{ticks:{callback:v=>v>=1000?(v/1000).toFixed(0)+'K':v}},y1:{position:'right',grid:{display:false},ticks:{color:C.w,callback:v=>v+'%'}}}});
 
@@ -347,7 +360,7 @@ function renderCharts(id){
       {l:'Contribution Initiated',v:d.contri_initiated[ci],c:'#ff4d6d'},
       {l:'Cart Created',v:d.cart_created[ci],c:'#ffa940'},
       {l:'Order Created',v:d.order_created[ci],c:'#7c6fcd'},
-      {l:'Order Placed',v:d.order_placed[ci],c:'#00d4aa'},
+      {l:'Order Placed',v:d.order_placed[ci],c:'#008866'},
     ];
     const mx=steps[0].v||1;
     fn.innerHTML=steps.map((s,i)=>{
@@ -364,7 +377,7 @@ function renderCharts(id){
       {l:'SAC Initiated',v:d.sac_initiated[si],c:'#ff4d6d'},
       {l:'Step 1 Done',v:d.step1[si],c:'#ffa940'},
       {l:'Step 2 Done',v:d.step2[si],c:'#7c6fcd'},
-      {l:'Step 3 Done',v:d.step3[si],c:'#00d4aa'},
+      {l:'Step 3 Done',v:d.step3[si],c:'#008866'},
     ];
     const mx=steps[0].v||1;
     sac.innerHTML=steps.map((s,i)=>{
@@ -395,6 +408,15 @@ ids.forEach(id=>{
   const panel=buildPanel(id);
   document.getElementById('mainContent').appendChild(panel);
 });
+
+function toggleAccordion(e){
+  const header = e.currentTarget;
+  const content = document.getElementById('uploadContent');
+  const toggle = document.getElementById('uploadToggle');
+  
+  content.classList.toggle('open');
+  toggle.classList.toggle('open');
+}
 
 function switchTab(id,e){
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
