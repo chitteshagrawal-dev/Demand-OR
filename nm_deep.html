@@ -125,11 +125,13 @@ function bdg(v,inv){
   const n=parseFloat(v),cls=n>0?(inv?'down':'up'):n<0?(inv?'up':'down'):'neutral';
   return `<span class="badge ${cls}">${n>0?'+':''}${n.toFixed(1)}%</span>`;
 }
+const CHARTS={};
 function mkChart(id,type,labels,datasets,opts){
   const el=document.getElementById(id);if(!el)return;
+  if(CHARTS[id]){CHARTS[id].destroy();delete CHARTS[id];}
   const base={responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{color:'#6b6b85',font:{family:'DM Mono',size:10},boxWidth:10}},tooltip:{backgroundColor:'#1c1c26',titleColor:'#e8e8f0',bodyColor:'#6b6b85',borderColor:'#2a2a3a',borderWidth:1,titleFont:{family:'DM Mono',size:11},bodyFont:{family:'DM Mono',size:10}}},scales:{x:{grid:{color:'#1c1c26'},ticks:{color:'#6b6b85',font:{family:'DM Mono',size:10}}},y:{grid:{color:'#1c1c26'},ticks:{color:'#6b6b85',font:{family:'DM Mono',size:10}}}}};
   function m(t,s){for(const k in s){if(s[k]&&typeof s[k]==='object'&&!Array.isArray(s[k])){t[k]=t[k]||{};m(t[k],s[k]);}else{t[k]=s[k];}}return t;}
-  new Chart(el,{type,data:{labels,datasets},options:m(base,opts||{})});
+  CHARTS[id]=new Chart(el,{type,data:{labels,datasets},options:m(base,opts||{})});
 }
 
 // Funnel insight
@@ -185,16 +187,28 @@ function updateParetoChart(){
   const pts=curve.filter((_,i)=>i%step===0);
   
   // Update title
-  document.getElementById('pcTitle').textContent = monthLabels[paretoMonthIdx] + ' ' + (months[paretoMonthIdx].includes('08')?'2025':'2026');
+  document.getElementById('pcTitle').textContent = monthLabels[paretoMonthIdx] + ' ' + months[paretoMonthIdx].substring(0,4);
   
   // Update button states
   document.getElementById('pcPrev').disabled = paretoMonthIdx <= 1;
   document.getElementById('pcNext').disabled = paretoMonthIdx >= months.length - 1;
   
-  mkChart('pc','line',pts.map(p=>p.x.toFixed(0)+'%'),[
-    {label:'Cumulative Donation %',data:pts.map(p=>p.y),borderColor:'#008866',backgroundColor:'rgba(255,77,109,0.06)',tension:0.2,fill:true,pointRadius:0,borderWidth:2},
-    {label:'Equal Distribution',data:pts.map(p=>p.x),borderColor:'#2a2a3a',borderDash:[4,4],pointRadius:0,borderWidth:1}
-  ],{scales:{x:{ticks:{maxTicksLimit:8,callback:v=>v}},y:{ticks:{callback:v=>v+'%'}}},plugins:{tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y.toFixed(1)+'%'}}}});
+  if(CHARTS['pc']) CHARTS['pc'].destroy();
+  const pcEl=document.getElementById('pc');
+  if(pcEl) CHARTS['pc']=new Chart(pcEl,{
+    type:'scatter',
+    data:{datasets:[
+      {label:'Cumulative Donation %',data:pts.map(p=>({x:p.x,y:p.y})),showLine:true,borderColor:'#008866',backgroundColor:'rgba(0,136,102,0.06)',tension:0.2,fill:true,pointRadius:0,borderWidth:2},
+      {label:'Equal Distribution',data:pts.map(p=>({x:p.x,y:p.x})),showLine:true,borderColor:'#2a2a3a',borderDash:[4,4],pointRadius:0,borderWidth:1}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:'#6b6b85',font:{family:'DM Mono',size:10},boxWidth:10}},tooltip:{backgroundColor:'#1c1c26',titleColor:'#e8e8f0',bodyColor:'#6b6b85',borderColor:'#2a2a3a',borderWidth:1,callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y.toFixed(1)+'%'}}},
+      scales:{
+        x:{type:'linear',min:0,max:100,grid:{color:'#1c1c26'},ticks:{color:'#6b6b85',font:{family:'DM Mono',size:10},callback:v=>v+'%',maxTicksLimit:6}},
+        y:{type:'linear',min:0,max:100,grid:{color:'#1c1c26'},ticks:{color:'#6b6b85',font:{family:'DM Mono',size:10},callback:v=>v+'%'}}
+      }
+    }
+  });
 }
 
 function prevParetoMonth(){
