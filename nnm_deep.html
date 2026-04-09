@@ -81,7 +81,16 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
   </div>
   <div class="box"><div id="fb"></div><div id="fw" style="display:none"></div></div>
 
-  <div class="sh" style="margin-top:28px"><span class="st">04 — Campaign Droppers</span><div class="sl"></div><span class="sd">3 lenses · Feb &#8594; Mar decline</span></div>
+  <div style="margin-top:28px;border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+  <div onclick="toggleDroppers()" style="padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;background:var(--surface);">
+    <div>
+      <div style="font-size:10px;font-family:var(--mono);letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:3px">04 &mdash; Campaign Droppers</div>
+      <div style="font-size:13px;font-weight:600;color:var(--text)">3 lenses &middot; Feb &rarr; Mar decline</div>
+    </div>
+    <span id="droppers-icon" style="font-size:20px;color:var(--muted);font-weight:300">+</span>
+  </div>
+  <div id="droppers-body" style="display:none;padding:20px;background:var(--bg)">
+<div class="sl"></div><span class="sd">3 lenses · Feb &#8594; Mar decline</span></div>
   <div class="tb">
     <button class="tbtn active dt2" onclick="showDTab('dr',this)">Relative Drop
       <span class="tw" onclick="event.stopPropagation()"><span class="ti">?</span><span class="tb2">Donation fell &gt;50% MoM. Raised significantly last month but halved — may indicate campaign fatigue or fundraising goal reached.</span></span>
@@ -95,13 +104,68 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
   </div>
   <div class="box"><div id="dr"></div><div id="dd" style="display:none"></div><div id="dz" style="display:none"></div></div>
 
-  <div class="sh" style="margin-top:28px"><span class="st">05 — Conversion Drop Root Cause</span><div class="sl"></div><span class="sd">Which campaigns pulled overall conversion down?</span></div>
+  
+    </div>
+</div>
+<div class="sh" style="margin-top:28px"><span class="st">05 &mdash; Conversion Drop Root Cause</span><div class="sl"></div><span class="sd">Campaigns below benchmark &middot; Lost orders &amp; amount</span></div>
   <div id="ci" class="ib"></div>
-  <div class="g g21">
-    <div class="box"><div class="bh"><div><div class="bt">Campaigns with Sharpest Conversion Drop</div><div class="bw">Lost Orders = Feb visitors × conversion delta</div></div></div><div style="overflow-y:auto;max-height:280px"><table class="dt" id="cdt"></table></div></div>
-    <div class="box"><div class="bh"><div><div class="bt">Conversion Rate: Feb vs Mar</div><div class="bw">Gap between bars = lost conversion per campaign</div></div></div><div class="cw tall"><canvas id="cdc"></canvas></div></div>
+  <div class="box" style="margin-bottom:14px">
+    <div class="bh">
+      <div>
+        <div class="bt">Payment Funnel Drop &mdash; Initiated to Placed</div>
+        <div class="bw">Pure payment health signal &middot; Intent already established at initiation &middot; Drop here = gateway / UPI / UI failures</div>
+      </div>
+      <div style="display:flex;gap:5px;flex-shrink:0">
+        <button class="itpbtn active" onclick="showITPPeriod('prev',this)" style="padding:3px 8px;font-size:10px;font-family:var(--mono);border:1px solid var(--border);border-radius:4px;cursor:pointer;background:var(--accent);color:#fff">vs Feb</button>
+        <button class="itpbtn" onclick="showITPPeriod('3m',this)" style="padding:3px 8px;font-size:10px;font-family:var(--mono);border:1px solid var(--border);border-radius:4px;cursor:pointer;background:var(--surface2);color:var(--muted)">vs 3M Avg</button>
+        <button class="itpbtn" onclick="showITPPeriod('6m',this)" style="padding:3px 8px;font-size:10px;font-family:var(--mono);border:1px solid var(--border);border-radius:4px;cursor:pointer;background:var(--surface2);color:var(--muted)">vs 6M Avg</button>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap">
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:8px 14px;">
+        <div style="font-size:10px;font-family:var(--mono);color:var(--muted);margin-bottom:2px">Benchmark ITP%</div>
+        <div style="font-size:16px;font-weight:700;color:var(--accent)" id="itp-bench-val"></div>
+      </div>
+      <div style="background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:8px 14px;">
+        <div style="font-size:10px;font-family:var(--mono);color:var(--muted);margin-bottom:2px">Benchmark ASV</div>
+        <div style="font-size:13px;font-weight:600;color:var(--text)" id="itp-asv-val"></div>
+      </div>
+      <div style="background:rgba(230,51,84,0.05);border:1px solid rgba(230,51,84,0.2);border-radius:7px;padding:8px 14px;">
+        <div style="font-size:10px;font-family:var(--mono);color:var(--muted);margin-bottom:2px">Camps Below Benchmark</div>
+        <div style="font-size:16px;font-weight:700;color:#e63354" id="itp-camp-count"></div>
+      </div>
+    </div>
+    <div id="itp-total-pill" style="background:rgba(230,51,84,0.06);border:1px solid rgba(230,51,84,0.2);border-radius:7px;padding:8px 14px;margin-bottom:10px;display:none">
+      <div style="font-size:10px;font-family:var(--mono);color:var(--muted);margin-bottom:2px">Total Revenue Loss vs Benchmark</div>
+      <div style="font-size:18px;font-weight:700;color:#e63354" id="itp-total-loss"></div>
+      <div style="font-size:10px;font-family:var(--mono);color:var(--muted);margin-top:2px" id="itp-total-sub"></div>
+    </div>
+    <div style="overflow-x:auto"><table class="dt" id="itp-dt"></table></div>
+  </div>
+  <div class="tb" id="conv-period-tabs">
+    <button class="tbtn active ct" onclick="showConvPeriod('prev',this)">vs Feb (Prev Month)</button>
+    <button class="tbtn ct" onclick="showConvPeriod('3m',this)">vs 3M Average</button>
+    <button class="tbtn ct" onclick="showConvPeriod('6m',this)">vs 6M Average</button>
+  </div>
+  <div id="conv-table-wrap">
+    <div class="box">
+      <div class="bh">
+        <div>
+          <div class="bt" id="conv-table-title">Campaigns Below Feb Conversion Benchmark</div>
+          <div class="bw" id="conv-table-sub">Mar conv% below category Feb benchmark &middot; Lost Orders = Visitors x Conv Gap &middot; Amount Loss = Lost Orders x Category ASV</div>
+        </div>
+        <div id="conv-bench-pill" style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0">
+          <div style="font-size:10px;font-family:var(--mono);color:var(--muted)">Benchmark Conv%</div>
+          <div style="font-size:16px;font-weight:700;color:var(--accent)" id="conv-bench-val"></div>
+          <div style="font-size:10px;font-family:var(--mono);color:var(--muted)">Benchmark ASV</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text)" id="conv-asv-val"></div>
+        </div>
+      </div>
+      <div style="overflow-x:auto"><table class="dt" id="conv-dt"></table></div>
+    </div>
   </div>
   <div style="height:40px"></div>
+
 </div>
 
 <script>
@@ -252,26 +316,134 @@ document.getElementById('dz').innerHTML=dTable(DEEP.zeroed_out,[
 ]);
 function showDTab(t,btn){['dr','dd','dz'].forEach(id=>document.getElementById(id).style.display='none');document.getElementById(t).style.display='block';document.querySelectorAll('.dt2').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
 
-// ── CONVERSION ROOT CAUSE ────────────────────────────────────────────
+
+// ── SECTION 05: CONVERSION ROOT CAUSE ───────────────────────────────
+const CRC = {"prev": {"benchmark_conv": 11.253, "benchmark_asv": 960.0, "campaigns": [{"campaign_id": "1120665", "conv_rate": 0.012618296529968454, "uq_visitor": 317, "order_placed": 4, "lost_orders": -31.673595, "amount_loss": -30414.886334699997, "total_donation": 4100.0}, {"campaign_id": "757533", "conv_rate": 0.0, "uq_visitor": 176, "order_placed": 0, "lost_orders": -19.80616, "amount_loss": -19019.063201599998, "total_donation": 0.0}, {"campaign_id": "1077182", "conv_rate": 0.0, "uq_visitor": 158, "order_placed": 0, "lost_orders": -17.78053, "amount_loss": -17073.931737799998, "total_donation": 0.0}, {"campaign_id": "377638", "conv_rate": 0.0, "uq_visitor": 149, "order_placed": 0, "lost_orders": -16.767715, "amount_loss": -16101.3660059, "total_donation": 0.0}, {"campaign_id": "12523", "conv_rate": 0.0, "uq_visitor": 132, "order_placed": 0, "lost_orders": -14.854619999999999, "amount_loss": -14264.2974012, "total_donation": 0.0}, {"campaign_id": "1108335", "conv_rate": 0.007246376811594203, "uq_visitor": 138, "order_placed": 1, "lost_orders": -14.529829999999999, "amount_loss": -13952.414555799998, "total_donation": 500.0}, {"campaign_id": "1127450", "conv_rate": 0.021739130434782608, "uq_visitor": 138, "order_placed": 3, "lost_orders": -12.529829999999999, "amount_loss": -12031.894555799998, "total_donation": 8000.0}, {"campaign_id": "1056139", "conv_rate": 0.0, "uq_visitor": 105, "order_placed": 0, "lost_orders": -11.816175, "amount_loss": -11346.600205499999, "total_donation": 0.0}, {"campaign_id": "1102830", "conv_rate": 0.024193548387096774, "uq_visitor": 124, "order_placed": 3, "lost_orders": -10.954339999999998, "amount_loss": -10519.0145284, "total_donation": 2501.0}, {"campaign_id": "1112282", "conv_rate": 0.024793388429752067, "uq_visitor": 121, "order_placed": 3, "lost_orders": -10.616735, "amount_loss": -10194.8259511, "total_donation": 9200.0}]}, "3m": {"benchmark_conv": 7.57, "benchmark_asv": 1601.0, "campaigns": [{"campaign_id": "1120665", "conv_rate": 0.012618296529968454, "uq_visitor": 317, "order_placed": 4, "lost_orders": -19.9969, "amount_loss": -32012.037365, "total_donation": 4100.0}, {"campaign_id": "757533", "conv_rate": 0.0, "uq_visitor": 176, "order_placed": 0, "lost_orders": -13.3232, "amount_loss": -21328.44472, "total_donation": 0.0}, {"campaign_id": "1077182", "conv_rate": 0.0, "uq_visitor": 158, "order_placed": 0, "lost_orders": -11.960600000000001, "amount_loss": -19147.126510000002, "total_donation": 0.0}, {"campaign_id": "377638", "conv_rate": 0.0, "uq_visitor": 149, "order_placed": 0, "lost_orders": -11.279300000000001, "amount_loss": -18056.467405, "total_donation": 0.0}, {"campaign_id": "12523", "conv_rate": 0.0, "uq_visitor": 132, "order_placed": 0, "lost_orders": -9.9924, "amount_loss": -15996.33354, "total_donation": 0.0}, {"campaign_id": "1108335", "conv_rate": 0.007246376811594203, "uq_visitor": 138, "order_placed": 1, "lost_orders": -9.4466, "amount_loss": -15122.589609999999, "total_donation": 500.0}, {"campaign_id": "1056139", "conv_rate": 0.0, "uq_visitor": 105, "order_placed": 0, "lost_orders": -7.9485, "amount_loss": -12724.356225, "total_donation": 0.0}, {"campaign_id": "1127450", "conv_rate": 0.021739130434782608, "uq_visitor": 138, "order_placed": 3, "lost_orders": -7.4466, "amount_loss": -11920.88961, "total_donation": 8000.0}, {"campaign_id": "1114435", "conv_rate": 0.0, "uq_visitor": 86, "order_placed": 0, "lost_orders": -6.5102, "amount_loss": -10421.85367, "total_donation": 0.0}, {"campaign_id": "169596", "conv_rate": 0.0, "uq_visitor": 85, "order_placed": 0, "lost_orders": -6.4345, "amount_loss": -10300.669324999999, "total_donation": 0.0}]}, "6m": {"benchmark_conv": 4.377, "benchmark_asv": 2526.0, "campaigns": [{"campaign_id": "1120665", "conv_rate": 0.012618296529968454, "uq_visitor": 317, "order_placed": 4, "lost_orders": -9.874773000000001, "amount_loss": -24939.232950150006, "total_donation": 4100.0}, {"campaign_id": "757533", "conv_rate": 0.0, "uq_visitor": 176, "order_placed": 0, "lost_orders": -7.703344, "amount_loss": -19455.1804392, "total_donation": 0.0}, {"campaign_id": "1077182", "conv_rate": 0.0, "uq_visitor": 158, "order_placed": 0, "lost_orders": -6.915502, "amount_loss": -17465.4460761, "total_donation": 0.0}, {"campaign_id": "377638", "conv_rate": 0.0, "uq_visitor": 149, "order_placed": 0, "lost_orders": -6.521581, "amount_loss": -16470.578894550003, "total_donation": 0.0}, {"campaign_id": "12523", "conv_rate": 0.0, "uq_visitor": 132, "order_placed": 0, "lost_orders": -5.777508, "amount_loss": -14591.385329400002, "total_donation": 0.0}, {"campaign_id": "1108335", "conv_rate": 0.007246376811594203, "uq_visitor": 138, "order_placed": 1, "lost_orders": -5.040122000000001, "amount_loss": -12729.080117100004, "total_donation": 500.0}, {"campaign_id": "1056139", "conv_rate": 0.0, "uq_visitor": 105, "order_placed": 0, "lost_orders": -4.595745, "amount_loss": -11606.783784750001, "total_donation": 0.0}, {"campaign_id": "1114435", "conv_rate": 0.0, "uq_visitor": 86, "order_placed": 0, "lost_orders": -3.7641340000000003, "amount_loss": -9506.508623700001, "total_donation": 0.0}, {"campaign_id": "169596", "conv_rate": 0.0, "uq_visitor": 85, "order_placed": 0, "lost_orders": -3.720365, "amount_loss": -9395.967825750002, "total_donation": 0.0}, {"campaign_id": "377597", "conv_rate": 0.0, "uq_visitor": 85, "order_placed": 0, "lost_orders": -3.720365, "amount_loss": -9395.967825750002, "total_donation": 0.0}]}};
+
+const ITP_DATA = {"prev": {"benchmark_itp": 41.633, "benchmark_asv": 960.0, "campaigns": [{"campaign_id": "1077182", "itp_rate": 0.0, "contri_initiated": 120, "order_placed": 0, "lost_orders": -49.95912, "amount_loss": -47973.7445712, "total_donation": 0.0}, {"campaign_id": "1124041", "itp_rate": 0.0, "contri_initiated": 75, "order_placed": 0, "lost_orders": -31.224449999999997, "amount_loss": -29983.590356999997, "total_donation": 0.0}, {"campaign_id": "1117274", "itp_rate": 0.0, "contri_initiated": 68, "order_placed": 0, "lost_orders": -28.310167999999997, "amount_loss": -27185.12192368, "total_donation": 0.0}, {"campaign_id": "1112735", "itp_rate": 0.0, "contri_initiated": 56, "order_placed": 0, "lost_orders": -23.314256, "amount_loss": -22387.74746656, "total_donation": 0.0}, {"campaign_id": "1117268", "itp_rate": 0.0, "contri_initiated": 52, "order_placed": 0, "lost_orders": -21.648951999999998, "amount_loss": -20788.62264752, "total_donation": 0.0}, {"campaign_id": "1120538", "itp_rate": 0.0, "contri_initiated": 47, "order_placed": 0, "lost_orders": -19.567321999999997, "amount_loss": -18789.716623719996, "total_donation": 0.0}, {"campaign_id": "1112370", "itp_rate": 0.0, "contri_initiated": 46, "order_placed": 0, "lost_orders": -19.150996, "amount_loss": -18389.935418959998, "total_donation": 0.0}, {"campaign_id": "1124042", "itp_rate": 0.0, "contri_initiated": 42, "order_placed": 0, "lost_orders": -17.485692, "amount_loss": -16790.81059992, "total_donation": 0.0}, {"campaign_id": "1112368", "itp_rate": 0.0, "contri_initiated": 41, "order_placed": 0, "lost_orders": -17.069366, "amount_loss": -16391.02939516, "total_donation": 0.0}, {"campaign_id": "1112385", "itp_rate": 0.0, "contri_initiated": 41, "order_placed": 0, "lost_orders": -17.069366, "amount_loss": -16391.02939516, "total_donation": 0.0}]}, "3m": {"benchmark_itp": 28.019, "benchmark_asv": 1601.0, "campaigns": [{"campaign_id": "1077182", "itp_rate": 0.0, "contri_initiated": 120, "order_placed": 0, "lost_orders": -33.62256, "amount_loss": -53824.675176, "total_donation": 0.0}, {"campaign_id": "1124041", "itp_rate": 0.0, "contri_initiated": 75, "order_placed": 0, "lost_orders": -21.0141, "amount_loss": -33640.42198499999, "total_donation": 0.0}, {"campaign_id": "1117274", "itp_rate": 0.0, "contri_initiated": 68, "order_placed": 0, "lost_orders": -19.052784, "amount_loss": -30500.649266399996, "total_donation": 0.0}, {"campaign_id": "1112735", "itp_rate": 0.0, "contri_initiated": 56, "order_placed": 0, "lost_orders": -15.690528, "amount_loss": -25118.181748799998, "total_donation": 0.0}, {"campaign_id": "1117268", "itp_rate": 0.0, "contri_initiated": 52, "order_placed": 0, "lost_orders": -14.569776, "amount_loss": -23324.025909599997, "total_donation": 0.0}, {"campaign_id": "1120538", "itp_rate": 0.0, "contri_initiated": 47, "order_placed": 0, "lost_orders": -13.168835999999999, "amount_loss": -21081.331110599996, "total_donation": 0.0}, {"campaign_id": "1112370", "itp_rate": 0.0, "contri_initiated": 46, "order_placed": 0, "lost_orders": -12.888648, "amount_loss": -20632.7921508, "total_donation": 0.0}, {"campaign_id": "1124042", "itp_rate": 0.0, "contri_initiated": 42, "order_placed": 0, "lost_orders": -11.767896, "amount_loss": -18838.6363116, "total_donation": 0.0}, {"campaign_id": "1112368", "itp_rate": 0.0, "contri_initiated": 41, "order_placed": 0, "lost_orders": -11.487708, "amount_loss": -18390.0973518, "total_donation": 0.0}, {"campaign_id": "1112385", "itp_rate": 0.0, "contri_initiated": 41, "order_placed": 0, "lost_orders": -11.487708, "amount_loss": -18390.0973518, "total_donation": 0.0}]}, "6m": {"benchmark_itp": 17.975, "benchmark_asv": 2526.0, "campaigns": [{"campaign_id": "1077182", "itp_rate": 0.0, "contri_initiated": 120, "order_placed": 0, "lost_orders": -21.56964, "amount_loss": -54475.204302000006, "total_donation": 0.0}, {"campaign_id": "1124041", "itp_rate": 0.0, "contri_initiated": 75, "order_placed": 0, "lost_orders": -13.481024999999999, "amount_loss": -34047.00268875, "total_donation": 0.0}, {"campaign_id": "1117274", "itp_rate": 0.0, "contri_initiated": 68, "order_placed": 0, "lost_orders": -12.222795999999999, "amount_loss": -30869.2824378, "total_donation": 0.0}, {"campaign_id": "1112735", "itp_rate": 0.0, "contri_initiated": 56, "order_placed": 0, "lost_orders": -10.065832, "amount_loss": -25421.762007600002, "total_donation": 0.0}, {"campaign_id": "1117268", "itp_rate": 0.0, "contri_initiated": 52, "order_placed": 0, "lost_orders": -9.346843999999999, "amount_loss": -23605.921864199998, "total_donation": 0.0}, {"campaign_id": "1120538", "itp_rate": 0.0, "contri_initiated": 47, "order_placed": 0, "lost_orders": -8.448108999999999, "amount_loss": -21336.121684949998, "total_donation": 0.0}, {"campaign_id": "1112370", "itp_rate": 0.0, "contri_initiated": 46, "order_placed": 0, "lost_orders": -8.268362, "amount_loss": -20882.161649100002, "total_donation": 0.0}, {"campaign_id": "1124042", "itp_rate": 0.0, "contri_initiated": 42, "order_placed": 0, "lost_orders": -7.549373999999999, "amount_loss": -19066.3215057, "total_donation": 0.0}, {"campaign_id": "1112368", "itp_rate": 0.0, "contri_initiated": 41, "order_placed": 0, "lost_orders": -7.3696269999999995, "amount_loss": -18612.36146985, "total_donation": 0.0}, {"campaign_id": "1112385", "itp_rate": 0.0, "contri_initiated": 41, "order_placed": 0, "lost_orders": -7.3696269999999995, "amount_loss": -18612.36146985, "total_donation": 0.0}]}};
+
 (()=>{
-  const cd=DEEP.conv_droppers;
-  const fc=DEEP.funnel_compare;
-  const jc=fc.prev.uq_visitor>0?fc.prev.order_placed/fc.prev.uq_visitor*100:0;
-  const mc=fc.cur.uq_visitor>0?fc.cur.order_placed/fc.cur.uq_visitor*100:0;
-  const impact=cd.reduce((s,r)=>s+parseFloat(r.traffic_impact||0),0);
-  document.getElementById('ci').innerHTML=
-    'Overall conversion: <strong>Feb '+jc.toFixed(2)+'% &#8594; Mar '+mc.toFixed(2)+'%</strong>. '+
-    'The '+cd.length+' campaigns below account for an estimated <strong>'+Math.abs(impact).toFixed(0)+' lost orders</strong>. '+
-    'High traffic + high conv drop = highest priority to investigate.';
-  document.getElementById('cdt').innerHTML='<thead><tr><th>Campaign</th><th class="num">Feb Conv%</th><th class="num">Mar Conv%</th><th class="num">&#916; (pp)</th><th class="num">Mar Visitors</th><th class="num">Lost Orders</th></tr></thead><tbody>'+
-  cd.map(r=>{const d=parseFloat(r.conv_drop)||0,i=parseFloat(r.traffic_impact)||0;
-    return '<tr><td style="font-weight:500">#'+r.campaign_id+'</td><td class="num">'+parseFloat(r.conv_rate_jan).toFixed(2)+'%</td><td class="num">'+parseFloat(r.conv_rate_feb).toFixed(2)+'%</td><td class="num"><span class="badge down">'+d.toFixed(2)+'pp</span></td><td class="num">'+fmt(r.uq_visitor_feb,'n')+'</td><td class="num" style="color:#e63354">'+Math.abs(i).toFixed(0)+'</td></tr>';
-  }).join('')+'</tbody>';
-  if(cd.length) mkChart('cdc','bar',cd.map(r=>'#'+r.campaign_id),[
-    {label:'Feb',data:cd.map(r=>parseFloat(r.conv_rate_jan).toFixed(2)),backgroundColor:'rgba(107,107,133,0.4)',borderColor:'#8888a0',borderWidth:1},
-    {label:'Mar',data:cd.map(r=>parseFloat(r.conv_rate_feb).toFixed(2)),backgroundColor:'rgba(230,51,84,0.4)',borderColor:'#e63354',borderWidth:1},
-  ],{scales:{x:{ticks:{maxRotation:45}},y:{ticks:{callback:v=>v+'%'}}}});
+  const fc = DEEP.funnel_compare;
+  const jc = fc.prev.uq_visitor>0 ? fc.prev.order_placed/fc.prev.uq_visitor*100 : 0;
+  const mc2 = fc.cur.uq_visitor>0 ? fc.cur.order_placed/fc.cur.uq_visitor*100 : 0;
+  document.getElementById('ci').innerHTML =
+    'Overall conversion: <strong>Feb ' + jc.toFixed(2) + '% to Mar ' + mc2.toFixed(2) + '%</strong>. ' +
+    'Below: campaigns whose Mar conversion fell below each period benchmark. ' +
+    'Lost Orders = campaign visitors x (campaign conv% - benchmark conv%). Amount Loss = Lost Orders x category ASV for that period.';
+  showConvPeriod('prev', document.querySelector('.ct'));
+  showITPPeriod('prev', document.querySelector('.itpbtn'));
 })();
+
+
+function showITPPeriod(period, btn) {
+  document.querySelectorAll('.itpbtn').forEach(b => {
+    b.style.background = 'var(--surface2)'; b.style.color = 'var(--muted)';
+  });
+  btn.style.background = 'var(--accent)'; btn.style.color = '#fff';
+
+  const d = ITP_DATA[period];
+  document.getElementById('itp-bench-val').textContent = d.benchmark_itp.toFixed(1) + '%';
+  document.getElementById('itp-asv-val').textContent = fmt(d.benchmark_asv, 'c');
+  document.getElementById('itp-camp-count').textContent = d.campaigns.length;
+
+  if (!d.campaigns || !d.campaigns.length) {
+    document.getElementById('itp-dt').innerHTML = '<tbody><tr><td colspan="7" style="padding:20px;color:var(--muted);font-family:var(--mono);font-size:12px">No campaigns below this benchmark.</td></tr></tbody>';
+    return;
+  }
+
+  document.getElementById('itp-dt').innerHTML =
+    '<thead><tr>' +
+    '<th>Campaign</th>' +
+    '<th class="num">Mar ITP%</th>' +
+    '<th class="num">Benchmark%</th>' +
+    '<th class="num">Gap</th>' +
+    '<th class="num">Initiated</th>' +
+    '<th class="num">Lost Orders</th>' +
+    '<th class="num">Amount Loss</th>' +
+    '</tr></thead><tbody>' +
+    d.campaigns.map(r => {
+      const itp = parseFloat(r.itp_rate) * 100;
+      const gap = itp - d.benchmark_itp;
+      const lost = Math.abs(parseFloat(r.lost_orders));
+      const loss = Math.abs(parseFloat(r.amount_loss));
+      return '<tr>' +
+        '<td style="font-weight:500">#' + r.campaign_id + '</td>' +
+        '<td class="num">' + itp.toFixed(1) + '%</td>' +
+        '<td class="num">' + d.benchmark_itp.toFixed(1) + '%</td>' +
+        '<td class="num"><span class="badge down">' + gap.toFixed(1) + 'pp</span></td>' +
+        '<td class="num">' + fmt(r.contri_initiated, 'n') + '</td>' +
+        '<td class="num" style="color:#e63354;font-weight:600">-' + Math.round(lost) + '</td>' +
+        '<td class="num" style="color:#e63354;font-weight:600">-' + fmt(loss, 'c') + '</td>' +
+        '</tr>';
+    }).join('') + '</tbody>';
+
+  const totalLost = d.campaigns.reduce((s,r) => s + Math.abs(parseFloat(r.lost_orders)||0), 0);
+  const totalAmt  = d.campaigns.reduce((s,r) => s + Math.abs(parseFloat(r.amount_loss)||0), 0);
+  const pill = document.getElementById('itp-total-pill');
+  if(totalAmt > 0){
+    pill.style.display = 'block';
+    document.getElementById('itp-total-loss').textContent = '-' + fmt(totalAmt, 'c');
+    document.getElementById('itp-total-sub').textContent = 'Across top ' + d.campaigns.length + ' campaigns below benchmark · ' + Math.round(totalLost) + ' lost orders';
+  } else { pill.style.display = 'none'; }
+}
+
+function showConvPeriod(period, btn) {
+  document.querySelectorAll('.ct').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const d = CRC[period];
+  const titleMap = {prev: 'vs Feb (Prev Month)', '3m': 'vs 3M Average', '6m': 'vs 6M Average'};
+  const subMap = {
+    prev: 'Mar conv% vs category Feb benchmark',
+    '3m': 'Mar conv% vs category 3M average',
+    '6m': 'Mar conv% vs category 6M average'
+  };
+  document.getElementById('conv-table-title').textContent = 'Campaigns Below ' + titleMap[period] + ' Benchmark';
+  document.getElementById('conv-table-sub').textContent = subMap[period] + ' · Lost Orders = Visitors x Conv Gap · Amount Loss = Lost Orders x Category ASV';
+  document.getElementById('conv-bench-val').textContent = d.benchmark_conv.toFixed(2) + '%';
+  document.getElementById('conv-asv-val').textContent = fmt(d.benchmark_asv, 'c');
+
+  const rows = d.campaigns;
+  if (!rows || !rows.length) {
+    document.getElementById('conv-dt').innerHTML = '<tbody><tr><td colspan="7" style="padding:20px;color:var(--muted);font-family:var(--mono);font-size:12px">No campaigns below this benchmark.</td></tr></tbody>';
+    return;
+  }
+
+  document.getElementById('conv-dt').innerHTML =
+    '<thead><tr>' +
+    '<th>Campaign</th>' +
+    '<th class="num">Mar Conv%</th>' +
+    '<th class="num">Benchmark%</th>' +
+    '<th class="num">Conv Gap</th>' +
+    '<th class="num">Mar Visitors</th>' +
+    '<th class="num">Lost Orders</th>' +
+    '<th class="num">Amount Loss</th>' +
+    '</tr></thead><tbody>' +
+    rows.map(r => {
+      const convRate = parseFloat(r.conv_rate) * 100;
+      const gap = convRate - d.benchmark_conv;
+      const lost = Math.abs(parseFloat(r.lost_orders));
+      const loss = Math.abs(parseFloat(r.amount_loss));
+      return '<tr>' +
+        '<td style="font-weight:500">#' + r.campaign_id + '</td>' +
+        '<td class="num">' + convRate.toFixed(2) + '%</td>' +
+        '<td class="num">' + d.benchmark_conv.toFixed(2) + '%</td>' +
+        '<td class="num"><span class="badge down">' + gap.toFixed(2) + 'pp</span></td>' +
+        '<td class="num">' + fmt(r.uq_visitor, 'n') + '</td>' +
+        '<td class="num" style="color:#e63354;font-weight:600">-' + Math.round(lost) + '</td>' +
+        '<td class="num" style="color:#e63354;font-weight:600">-' + fmt(loss, 'c') + '</td>' +
+        '</tr>';
+    }).join('') +
+    '</tbody>';
+}
+
+function toggleDroppers(){
+  const body = document.getElementById('droppers-body');
+  const icon = document.getElementById('droppers-icon');
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  icon.textContent = open ? '+' : '-';
+}
 </script>
 </body>
 </html>
