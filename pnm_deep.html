@@ -248,7 +248,7 @@ document.getElementById('dz').innerHTML=dTable(DEEP.zeroed_out,[
   {l:'Campaign',r:r=>'<span style="font-weight:500">#'+r.campaign_id+'</span>'},
   {l:'Feb Donation',n:true,r:r=>fmt(r.jan_donation,'c')},
   {l:'Mar Donation',n:true,r:r=>'<span style="color:#e63354">₹0</span>'},
-  {l:'Status',r:r=>'<span class="badge down">Zero'd Out</span>'},
+  {l:'Status',r:r=>'<span class="badge down">Zeroed Out</span>'},
 ]);
 function showDTab(t,btn){['dr','dd','dz'].forEach(id=>document.getElementById(id).style.display='none');document.getElementById(t).style.display='block';document.querySelectorAll('.dt2').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
 
