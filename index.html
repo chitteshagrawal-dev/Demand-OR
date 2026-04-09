@@ -129,6 +129,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .accordion-toggle.open{transform:rotate(180deg);}
 .accordion-content{max-height:0;overflow:hidden;transition:max-height 0.3s ease-out;}
 .accordion-content.open{max-height:500px;transition:max-height 0.3s ease-in;padding:16px;border-top:1px solid var(--border);}
+.fi-wrap:hover .fi-tip{display:block !important;}
 </style>
 </head>
 <body>
@@ -201,8 +202,34 @@ function ragSignal(cat){
 }
 function healthScore(cat){
   const c=RAW[cat].comp;
-  const scores=[c.donation?.prev||0,c.orders?.prev||0,c.conversion?.prev||0,c.tip?.prev||0];
-  return Math.max(0,Math.min(100,Math.round(50+scores.reduce((a,b)=>a+b,0)/scores.length*200)));
+  const d=c.donation?.prev||0;
+  const a=c.asv?.prev||0;
+  const t=c.tip?.prev||0;
+  // Weighted score: Donation 40%, ASV 30%, Tip Attach 30%
+  // Each metric: +1 if positive, -1 if negative, 0 if neutral (within ±2%)
+  const score = (d>0.02?1:d<-0.02?-1:0)*40 +
+                (a>0.02?1:a<-0.02?-1:0)*30 +
+                (t>0.02?1:t<-0.02?-1:0)*30;
+  return score; // range -100 to +100
+}
+
+function healthFactors(cat){
+  const c=RAW[cat].comp;
+  const checks=[
+    {label:'Total Donation',   val:c.donation?.prev||0, weight:40},
+    {label:'Avg Ticket Size',  val:c.asv?.prev||0,      weight:30},
+    {label:'Tip Attach Rate',  val:c.tip?.prev||0,      weight:30},
+  ];
+  return checks.map(ch=>{
+    const v=parseFloat(ch.val)||0;
+    const status=v>0.02?'good':v<-0.02?'bad':'neutral';
+    const tooltip=status==='good'
+      ? '+'+( v*100).toFixed(1)+'% MoM — contributes '+ch.weight+'% to health. Positive impact.'
+      : status==='bad'
+      ? (v*100).toFixed(1)+'% MoM — contributes '+ch.weight+'% to health. Dragging score down.'
+      : (v*100).toFixed(1)+'% MoM — contributes '+ch.weight+'% to health. Within neutral range (±2%).';
+    return {label:ch.label, val:v, weight:ch.weight, status, pct:(v*100).toFixed(1), tooltip};
+  });
 }
 
 function kpiCard(label,val,comp,dir,catId,metric){
@@ -259,8 +286,8 @@ function buildPanel(id){
   const ci=months.length-1;
   const comp=d.comp;
   const hs=healthScore(cat);
-  const hsc=hs>=55?'green':hs>=40?'amber':'red';
-  const hsd=hs>=55?'Category performing above trend — donation and monetisation healthy.':hs>=40?'Mixed signals — some metrics improving, others need attention.':'Category under pressure — multiple metrics declining vs prior month.';
+  const hsc=hs>0?'green':hs<0?'red':'amber';
+  const hsd=hs>0?'Performing well — key metrics trending up vs last month.':hs<0?'Under pressure — one or more key metrics declining.':'Mixed signals — metrics moving in different directions.';
   
   const anoms=[];
   if((comp.donation?.prev||0)<-0.2) anoms.push({t:'bad',i:'⚠',tx:`Donation down ${dStr(comp.donation.prev)} MoM`});
@@ -276,10 +303,36 @@ function buildPanel(id){
   const el=document.createElement('div');
   el.className='cat-panel';el.id=`panel-${id}`;
   el.innerHTML=`
-    <div class="health-bar">
-      <div><div style="font-size:10px;font-family:var(--mono);color:var(--muted);margin-bottom:2px;">HEALTH SCORE</div><div class="hs ${hsc}">${hs}/100</div></div>
-      <div class="hs-desc">${hsd}</div>
-      <a href="${DEEP_LINKS[id]}" class="deep-link">Deep Dive →</a> <a href="kpi_deep.html?cat=${id}" class="deep-link" style="margin-left:6px;background:var(--surface2);color:var(--accent3);border-color:var(--accent3)">KPI ↗</a>
+    <div class="health-bar" style="flex-wrap:wrap;gap:10px">
+      <div style="display:flex;align-items:center;gap:14px;flex-shrink:0">
+        <div><div style="font-size:10px;font-family:var(--mono);color:var(--muted);margin-bottom:2px;">HEALTH SCORE</div><div class="hs ${hsc}">${hs>0?"Good":hs<0?"Bad":"Neutral"}</div></div>
+        <div class="hs-desc" style="max-width:200px">${hsd}</div>
+      </div>
+      <div style="flex:1;min-width:280px">
+        <div style="font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Key Factors</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px">
+          ${healthFactors(cat).map(f=>{
+            const bg=f.status==='good'?'rgba(0,122,88,0.08)':f.status==='bad'?'rgba(230,51,84,0.08)':'rgba(107,107,133,0.08)';
+            const bc=f.status==='good'?'rgba(0,122,88,0.25)':f.status==='bad'?'rgba(230,51,84,0.25)':'rgba(107,107,133,0.25)';
+            const cl=f.status==='good'?'#007a58':f.status==='bad'?'#e63354':'#6b6b85';
+            const ic=f.status==='good'?'&#9650;':f.status==='bad'?'&#9660;':'&#9644;';
+            const lbl=f.status==='good'?'Good':f.status==='bad'?'Bad':'Neutral';
+            return '<div style="position:relative;display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:5px;font-size:10px;font-family:var(--mono);font-weight:500;background:'+bg+';border:1px solid '+bc+';color:'+cl+'">'+
+              '<span>'+ic+'</span>'+
+              '<span>'+f.label+'</span>'+
+              '<span style="font-weight:700;opacity:0.85">'+lbl+'</span>'+
+              '<span class="fi-wrap" style="position:relative;display:inline-flex;align-items:center;">'+
+                '<span style="width:13px;height:13px;border-radius:50%;background:rgba(0,0,0,0.08);font-size:8px;display:inline-flex;align-items:center;justify-content:center;cursor:help;font-weight:700">i</span>'+
+                '<span class="fi-tip" style="display:none;position:absolute;bottom:20px;left:50%;transform:translateX(-50%);z-index:999;background:#fff;border:1px solid #e2e2ec;border-radius:6px;padding:8px 10px;font-size:10px;color:#444;font-family:var(--mono);width:220px;line-height:1.6;box-shadow:0 4px 12px rgba(0,0,0,0.1);font-weight:400;white-space:normal;pointer-events:none">'+f.tooltip+'</span>'+
+              '</span>'+
+            '</div>';
+          }).join('')}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;align-items:center">
+        <a href="${DEEP_LINKS[id]}" class="deep-link">Deep Dive →</a>
+        <a href="kpi_deep.html?cat=${id}" class="deep-link" style="background:var(--surface2);color:var(--accent3);border-color:var(--accent3)">KPI ↗</a>
+      </div>
     </div>
 
     <div class="sh"><span class="st">01 — Executive Summary</span><div class="sl"></div><span class="sd">What is happening</span></div>
