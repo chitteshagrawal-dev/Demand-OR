@@ -91,24 +91,58 @@ function buildActions(cat,d,comp){
   const pd=comp.donation&&comp.donation.prev||0;
   const pc=comp.conversion&&comp.conversion.prev||0;
   const pt=comp.tip&&comp.tip.prev||0;
-  const itp=d.initiate_to_placed&&d.initiate_to_placed[ci]||0;
   const tp=d.tip_pct&&d.tip_pct[ci]||0;
   const rl=d.raised_live_pct&&d.raised_live_pct[ci]||0;
   const asv=d.asv&&d.asv[ci]||0;
   const prevAsv=d.asv&&d.asv[ci-1]||0;
   const avgTip=d.avg_tip&&d.avg_tip[ci]||0;
-  const sacComp=d.sac_completion&&d.sac_completion[ci]||0;
 
-  if(pd<-0.2) acts.push({p:"high",t:"Investigate donation drop urgently",b:"Donation fell "+dStr(pd)+" MoM. Cross-check with traffic data. If visitors are stable, conversion is the issue. Open Deep Dive to see campaign-level droppers.",m:"Donation "+dStr(pd)+" MoM"});
-  if(itp<0.45) acts.push({p:"high",t:"Payment funnel leaking",b:"Only "+fmt(itp,"p")+" of donors who initiate complete payment. Benchmark is ~50%. Audit payment gateway success rates and UPI timeout errors.",m:"Initiate to Placed: "+fmt(itp,"p")});
+  // ── Special context for NGO Non-Medical (used to augment relevant insights) ──
+  const isNNM = cat==='ngo_non_medical';
+  const pageantNote = isNNM ? " <em style=\"display:block;margin-top:6px;color:#444;border-left:2px solid var(--accent);padding-left:8px\">Likely explanation: March was inflated by a one-off Beauty Pageant event by an NGO (~₹65L). April is a normalisation, not a structural decline.</em>" : "";
+
+  // ── Payment funnel: only flag if any step dropped >20% MoM ──────
+  const ciVals=d.contri_initiated||[];
+  const ccVals=d.cart_created||[];
+  const ocVals=d.order_created||[];
+  const opVals=d.order_placed||[];
+  if(ciVals.length>=2){
+    const i=ciVals.length-1, p=i-1;
+    const curIC=ciVals[i]>0?ccVals[i]/ciVals[i]:0;
+    const prevIC=ciVals[p]>0?ccVals[p]/ciVals[p]:0;
+    const curCO=ccVals[i]>0?ocVals[i]/ccVals[i]:0;
+    const prevCO=ccVals[p]>0?ocVals[p]/ccVals[p]:0;
+    const curOP=ocVals[i]>0?opVals[i]/ocVals[i]:0;
+    const prevOP=ocVals[p]>0?opVals[p]/ocVals[p]:0;
+    const curITP=ciVals[i]>0?opVals[i]/ciVals[i]:0;
+    const prevITP=ciVals[p]>0?opVals[p]/ciVals[p]:0;
+    const dropPct=(c,p)=>p>0?(c-p)/p:0;
+
+    const steps=[
+      {n:"Initiated to Cart",     c:curIC, p:prevIC, d:dropPct(curIC,prevIC)},
+      {n:"Cart to Order Created", c:curCO, p:prevCO, d:dropPct(curCO,prevCO)},
+      {n:"Order Created to Placed",c:curOP,p:prevOP, d:dropPct(curOP,prevOP)},
+      {n:"Overall Initiate to Placed",c:curITP,p:prevITP, d:dropPct(curITP,prevITP)},
+    ];
+    const bigDrops=steps.filter(s=>s.d<-0.20);
+    if(bigDrops.length){
+      const worst=bigDrops.reduce((a,b)=>b.d<a.d?b:a);
+      acts.push({p:"high",t:"Payment funnel — sharp drop in "+worst.n,
+        b:"<strong>"+worst.n+"</strong> dropped from "+(worst.p*100).toFixed(1)+"% to "+(worst.c*100).toFixed(1)+"% MoM ("+(worst.d*100).toFixed(1)+"%). "+
+          (bigDrops.length>1?" Other steps with >20% drops: "+bigDrops.filter(s=>s!==worst).map(s=>s.n).join(", ")+". ":"")+
+          "Audit payment gateway, UPI timeouts, and any recent UX changes on the affected step.",
+        m:worst.n+": "+(worst.d*100).toFixed(1)+"% MoM"});
+    }
+  }
+
+  if(pd<-0.2) acts.push({p:"high",t:"Investigate donation drop urgently",b:"Donation fell "+dStr(pd)+" MoM. Cross-check with traffic data. If visitors are stable, conversion is the issue. Open Deep Dive to see campaign-level droppers."+pageantNote,m:"Donation "+dStr(pd)+" MoM"});
   if(tp<0.45) acts.push({p:"high",t:"Tip attach rate below threshold",b:"Tip attach at "+fmt(tp,"p")+" — Ketto primary revenue lever. A/B test tip slab positioning and try anchoring to a higher default slab.",m:"Tip Rate: "+fmt(tp,"p")});
-  if(pc<-0.15) acts.push({p:"high",t:"Order conversion dropped sharply",b:"Conversion fell "+dStr(pc)+" MoM. Open Deep Dive to see which campaigns pulled it down. Check for payment page changes or gateway issues.",m:"Conversion "+dStr(pc)+" MoM"});
+  if(pc<-0.15) acts.push({p:"high",t:"Order conversion dropped sharply",b:"Conversion fell "+dStr(pc)+" MoM. Open Deep Dive to see which campaigns pulled it down. Check for payment page changes or gateway issues."+pageantNote,m:"Conversion "+dStr(pc)+" MoM"});
   if(pd>0.05&&(comp.orders&&comp.orders.prev||0)<-0.05) acts.push({p:"medium",t:"Donation up but fewer orders",b:"ASV is doing the heavy lifting. Fewer donors making larger donations creates concentration risk. Focus on broadening mid-tier donor base.",m:"ASV up, Orders "+dStr(comp.orders&&comp.orders.prev||0)});
   if(rl<0.1) acts.push({p:"medium",t:"Low campaign activation rate",b:"Only "+fmt(rl,"p")+" of live campaigns raised funds. Test Day 3 and Day 7 automated nudges with sharing prompts to activate dormant campaigns.",m:"Raised/Live: "+fmt(rl,"p")});
   if(pt<-0.1) acts.push({p:"medium",t:"Tip revenue declining",b:"Average tip declining. Consider testing higher default tip slabs and making tip opt-out less prominent on mobile.",m:"Avg Tip: "+fmt(avgTip,"c")});
   if(asv<prevAsv*0.9&&prevAsv>0) acts.push({p:"medium",t:"ASV dropped significantly",b:"Average ticket size fell "+((asv-prevAsv)/prevAsv*100).toFixed(1)+"% MoM. Open KPI Drill-down to see if top campaigns or the rest are driving the decline.",m:"ASV: "+fmt(asv,"c")+" vs "+fmt(prevAsv,"c")+" prev"});
   if(pd>0.05) acts.push({p:"low",t:"Good month — document what worked",b:"Donation grew "+dStr(pd)+" MoM. Identify which campaigns drove growth — seasonal, new approvals, or specific campaign types — and replicate next month.",m:"Donation "+dStr(pd)+" MoM"});
-  acts.push({p:"medium",t:"Improve SAC completion rate",b:"Only "+fmt(sacComp,"p")+" of SAC initiations reach Step 3. Consider progressive form disclosure and adding mid-flow testimonials to reduce drop-off.",m:"SAC: "+fmt(sacComp,"p")});
 
   const order={high:0,medium:1,low:2};
   return acts.sort((a,b)=>order[a.p]-order[b.p]).slice(0,9);

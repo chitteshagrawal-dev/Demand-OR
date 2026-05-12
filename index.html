@@ -150,10 +150,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
   <div class="accordion-content" id="uploadContent">
     <div class="up-grid">
       <div class="up-slot loaded"><input type="file" accept=".xlsx,.xls,.csv" onchange="handleUpload(event,'agg')"><div class="up-icon">📊</div><span class="up-lbl">Aggregate File</span><div class="up-status">Demand_OR_Monthly_Review</div><div class="vtag">Apr 2026 loaded</div></div>
-      <div class="up-slot loaded"><input type="file" accept=".xlsx,.xls,.csv" multiple onchange="handleUpload(event,'pm')"><div class="up-icon">🏥</div><span class="up-lbl">Personal Medical Raw</span><div class="up-status">4 files · 468K rows</div><div class="vtag">Aug25–Feb26</div></div>
-      <div class="up-slot loaded"><input type="file" accept=".xlsx,.xls,.csv" multiple onchange="handleUpload(event,'pnm')"><div class="up-icon">🤝</div><span class="up-lbl">Personal Non-Medical Raw</span><div class="up-status">3 files · 190K rows</div><div class="vtag">Aug25–Feb26</div></div>
-      <div class="up-slot loaded"><input type="file" accept=".xlsx,.xls,.csv" multiple onchange="handleUpload(event,'nm')"><div class="up-icon">🏦</div><span class="up-lbl">NGO Medical Raw</span><div class="up-status">1 file · 46K rows</div><div class="vtag">Aug25–Feb26</div></div>
-      <div class="up-slot loaded"><input type="file" accept=".xlsx,.xls,.csv" multiple onchange="handleUpload(event,'nnm')"><div class="up-icon">🌿</div><span class="up-lbl">NGO Non-Medical Raw</span><div class="up-status">2 files · 246K rows</div><div class="vtag">Aug25–Feb26</div></div>
+      <div class="up-slot loaded"><input type="file" accept=".xlsx,.xls,.csv" multiple onchange="handleUpload(event,'pm')"><div class="up-icon">🏥</div><span class="up-lbl">Personal Medical Raw</span><div class="up-status">4 files · 468K rows</div><div class="vtag">Aug25–Apr26</div></div>
+      <div class="up-slot loaded"><input type="file" accept=".xlsx,.xls,.csv" multiple onchange="handleUpload(event,'pnm')"><div class="up-icon">🤝</div><span class="up-lbl">Personal Non-Medical Raw</span><div class="up-status">3 files · 190K rows</div><div class="vtag">Aug25–Apr26</div></div>
+      <div class="up-slot loaded"><input type="file" accept=".xlsx,.xls,.csv" multiple onchange="handleUpload(event,'nm')"><div class="up-icon">🏦</div><span class="up-lbl">NGO Medical Raw</span><div class="up-status">1 file · 46K rows</div><div class="vtag">Aug25–Apr26</div></div>
+      <div class="up-slot loaded"><input type="file" accept=".xlsx,.xls,.csv" multiple onchange="handleUpload(event,'nnm')"><div class="up-icon">🌿</div><span class="up-lbl">NGO Non-Medical Raw</span><div class="up-status">2 files · 246K rows</div><div class="vtag">Aug25–Apr26</div></div>
     </div>
     <div class="dq-bar"><div class="dq-dot"></div><span>All files loaded · No duplicate months · Aggregate vs Raw cross-check passed · Aug 2025 baseline</span></div>
   </div>
@@ -198,19 +198,17 @@ function mkChart(id,type,labels,datasets,opts){
 function ragSignal(cat){
   const c=RAW[cat].comp;
   const pd=c.donation?.prev||0,pc=c.conversion?.prev||0;
-  return pd>0.05&&pc>0?'green':pd<-0.15||pc<-0.2?'red':'amber';
+  const hs=healthScore(cat);return hs>0.5?'green':hs<-0.5?'red':'amber';
 }
 function healthScore(cat){
   const c=RAW[cat].comp;
-  const d=c.donation?.prev||0;
-  const a=c.asv?.prev||0;
-  const t=c.tip?.prev||0;
-  // Weighted score: Donation 40%, ASV 30%, Tip Attach 30%
-  // Each metric: +1 if positive, -1 if negative, 0 if neutral (within ±2%)
-  const score = (d>0.02?1:d<-0.02?-1:0)*40 +
-                (a>0.02?1:a<-0.02?-1:0)*30 +
-                (t>0.02?1:t<-0.02?-1:0)*30;
-  return score; // range -100 to +100
+  const d=parseFloat(c.donation?.prev)||0;
+  const a=parseFloat(c.asv?.prev)||0;
+  const t=parseFloat(c.tip?.prev)||0;
+  // Proportional weighted score: Donation 40%, ASV 30%, Tip Revenue 30%
+  // Score = actual delta * weight — so -12% donation outweighs +6% tip
+  const score = (d*40) + (a*30) + (t*30);
+  return score;
 }
 
 function healthFactors(cat){
@@ -286,8 +284,8 @@ function buildPanel(id){
   const ci=months.length-1;
   const comp=d.comp;
   const hs=healthScore(cat);
-  const hsc=hs>0?'green':hs<0?'red':'amber';
-  const hsd=hs>0?'Performing well — key metrics trending up vs last month.':hs<0?'Under pressure — one or more key metrics declining.':'Mixed signals — metrics moving in different directions.';
+  const hsc=hs>0.5?'green':hs<-0.5?'red':'amber';
+  const hsd=hs>0.5?'Performing well — key metrics trending up vs last month.':hs<-0.5?'Under pressure — one or more key metrics declining.':'Mixed signals — metrics moving in different directions.';
   
   const anoms=[];
   if((comp.donation?.prev||0)<-0.2) anoms.push({t:'bad',i:'⚠',tx:`Donation down ${dStr(comp.donation.prev)} MoM`});
@@ -305,7 +303,7 @@ function buildPanel(id){
   el.innerHTML=`
     <div class="health-bar" style="flex-wrap:wrap;gap:10px">
       <div style="display:flex;align-items:center;gap:14px;flex-shrink:0">
-        <div><div style="font-size:10px;font-family:var(--mono);color:var(--muted);margin-bottom:2px;">HEALTH SCORE</div><div class="hs ${hsc}">${hs>0?"Good":hs<0?"Bad":"Neutral"}</div></div>
+        <div><div style="font-size:10px;font-family:var(--mono);color:var(--muted);margin-bottom:2px;">HEALTH SCORE</div><div class="hs ${hsc}">${hs>0.5?"Good":hs<-0.5?"Bad":"Neutral"}</div></div>
         <div class="hs-desc" style="max-width:200px">${hsd}</div>
       </div>
       <div style="flex:1;min-width:280px">
@@ -346,7 +344,7 @@ function buildPanel(id){
     </div>
     <div class="anom">${anoms.map(a=>`<div class="apill ${a.t}"><span>${a.i}</span>${a.tx}</div>`).join('')}</div>
 
-    <div class="sh"><span class="st">02 — Trends</span><div class="sl"></div><span class="sd">Aug 25 – Feb 26</span></div>
+    <div class="sh"><span class="st">02 — Trends</span><div class="sl"></div><span class="sd">Aug 25 – Apr 26</span></div>
     <div class="cg cg2">
       <div class="box"><div class="bh"><div><div class="bt">Donation & Orders Trend</div><div class="bw">Decoupling signals ASV shift — fewer donors, higher value</div></div></div><div class="cw tall"><canvas id="ch-${id}-do"></canvas></div></div>
       <div class="box"><div class="bh"><div><div class="bt">Funnel Conversion Trend</div><div class="bw">Order conversion % vs Initiate→Placed % over time</div></div></div><div class="cw tall"><canvas id="ch-${id}-fc"></canvas></div></div>
@@ -358,15 +356,15 @@ function buildPanel(id){
 
     <div class="sh" style="margin-top:28px"><span class="st">03 — Deep Dive</span><div class="sl"></div><span class="sd">Root cause · <a href="${DEEP_LINKS[id]}" style="color:var(--accent3);text-decoration:none;font-weight:600;">Full campaign-level analysis →</a></span></div>
     <div class="cg cg21">
-      <div class="box"><div class="bh"><div><div class="bt">Payment Funnel — Feb 2026</div><div class="bw">Drop-off at each step — click Deep Dive for MoM comparison</div></div></div><div id="fn-${id}"></div></div>
-      <div class="box"><div class="bh"><div><div class="bt">SAC Funnel — Feb 2026</div><div class="bw">Campaign creation flow — supply health indicator</div></div></div><div id="sac-${id}"></div></div>
+      <div class="box"><div class="bh"><div><div class="bt">Payment Funnel — Apr 2026</div><div class="bw">Drop-off at each step — click Deep Dive for MoM comparison</div></div></div><div id="fn-${id}"></div></div>
+      <div class="box"><div class="bh"><div><div class="bt">SAC Funnel — Apr 2026</div><div class="bw">Campaign creation flow — supply health indicator</div></div></div><div id="sac-${id}"></div></div>
     </div>
     <div class="cg cg2" style="margin-top:14px">
       <div class="box"><div class="bh"><div><div class="bt">Campaign Effectiveness</div><div class="bw">Raised/Live % — what % of campaigns actually raise funds</div></div></div><div class="cw"><canvas id="ch-${id}-camp"></canvas></div></div>
-      <div class="box"><div class="bh"><div><div class="bt">Top 5 Campaigns — Feb 2026</div><div class="bw">Concentration check — if top 5 drive >50% it's fragile</div></div></div><div style="overflow:auto;max-height:200px"><table class="dt" id="t5-${id}"></table></div></div>
+      <div class="box"><div class="bh"><div><div class="bt">Top 5 Campaigns — Apr 2026</div><div class="bw">Concentration check — if top 5 drive >50% it's fragile</div></div></div><div style="overflow:auto;max-height:200px"><table class="dt" id="t5-${id}"></table></div></div>
     </div>
     <div class="box" style="margin-top:14px">
-      <div class="bh"><div><div class="bt">Offline Donations — Feb 2026</div><div class="bw">QR · Bank Transfer · Coupon — supplementary channel, not in funnel metrics</div></div></div>
+      <div class="bh"><div><div class="bt">Offline Donations — Apr 2026</div><div class="bw">QR · Bank Transfer · Coupon — supplementary channel, not in funnel metrics</div></div></div>
       <div class="off-mini">
         <div class="off-item"><div class="off-lbl">QR Amount</div><div class="off-val">${fmt(d.qr_amount?.[ci]||0,'c')}</div></div>
         <div class="off-item"><div class="off-lbl">Bank Transfer</div><div class="off-val">${fmt(d.bank_amount?.[ci]||0,'c')}</div></div>
@@ -456,8 +454,9 @@ function renderCharts(id){
 
   // Top 5
   const t5=document.getElementById(`t5-${id}`);
-  if(t5&&d.raw?.top10_feb){
-    const top5=d.raw.top10_feb.slice(0,5);
+  const _aprTop=d.top10_by_month&&d.last3?d.top10_by_month[d.last3[d.last3.length-1]]:null;
+  if(t5&&_aprTop){
+    const top5=_aprTop.slice(0,5);
     const ct=d.donation[ci];
     t5.innerHTML=`<thead><tr><th>Campaign</th><th class="num">Donation</th><th class="num">% of Total</th><th class="num">Donors</th><th class="num">Tip</th></tr></thead><tbody>`+
     top5.map(r=>`<tr><td style="font-weight:500;font-family:var(--mono)">#${r.campaign_id?.toString().replace('.0','')||'—'}</td><td class="num">${fmt(r.total_donation,'c')}</td><td class="num"><span class="bdg ${(r.total_donation/ct)>0.1?'down':'up'}">${((r.total_donation/ct)*100).toFixed(1)}%</span></td><td class="num">${Math.round(r.total_donors||0)}</td><td class="num">${fmt(r.tip_amount,'c')}</td></tr>`).join('')+
