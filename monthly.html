@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Ketto — Demand Monthly</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&display=swap');
+:root{
+  --bg:#F2F1EE;--surface:#FFFFFF;--surface2:#F5F4F1;--border:#DCDBD7;--border2:#E8E7E3;
+  --text:#1A1A1C;--muted:#636366;--muted2:#AEAEB2;
+  --accent:#1D4ED8;--accent2:#15803D;--accent3:#6D28D9;
+  --up:#15803D;--down:#B91C1C;--warn:#92400E;
+  --gbg:#F0FDF4;--gbd:#86EFAC;--rbg:#FEF2F2;--rbd:#FCA5A5;--abg:#FFFBEB;--abd:#FCD34D;
+  --sh1:0 1px 3px rgba(0,0,0,.08),0 1px 4px rgba(0,0,0,.06);
+  --sh2:0 4px 16px rgba(0,0,0,.09),0 2px 6px rgba(0,0,0,.05);
+  --sh3:0 10px 32px rgba(0,0,0,.10),0 4px 10px rgba(0,0,0,.06);
+  --mono:'IBM Plex Mono',monospace;--sans:'DM Sans',sans-serif;--serif:'Fraunces',serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)'/%3E%3C/svg%3E");background-size:360px 360px;background-repeat:repeat;background-attachment:fixed;}
+body{background:rgba(242,241,238,.85);color:var(--text);font-family:var(--sans);min-height:100vh;}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--bg);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+
+/* Header */
+.ph{padding:12px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:14px;background:rgba(242,241,238,.92);backdrop-filter:blur(20px) saturate(180%);-webkit-backdrop-filter:blur(20px) saturate(180%);position:sticky;top:0;z-index:200;}
+.ph-logo{font-size:15px;font-weight:400;font-family:var(--serif);letter-spacing:-0.01em;}
+.ph-badge{font-size:10px;font-family:var(--mono);background:var(--accent);color:#fff;padding:3px 9px;border-radius:20px;letter-spacing:1px;}
+.ph-period{font-size:11px;font-family:var(--mono);color:var(--muted);margin-left:auto;}
+
+/* Category tabs */
+.cat-tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--surface);overflow-x:auto;}
+.cat-tab{padding:12px 22px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;white-space:nowrap;}
+.cat-tab:hover{color:var(--text);}
+.cat-tab.active{font-weight:600;border-bottom-color:var(--cat-color,var(--accent));color:var(--text);}
+.cat-tabs{box-shadow:var(--sh1);}
+
+/* Content */
+.content{padding:20px 28px;max-width:1440px;}
+.panel{display:none;}.panel.active{display:block;}
+
+/* Loading state */
+.loading{padding:60px 28px;text-align:center;font-family:var(--mono);font-size:13px;color:var(--muted);}
+.error-box{padding:40px;margin:20px;background:#fff5f7;border:1px solid var(--down);border-radius:8px;color:var(--down);font-family:var(--mono);font-size:13px;}
+
+/* Week hero */
+.week-hero{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
+.wh-card{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:18px 20px;box-shadow:var(--sh1);transition:box-shadow .18s;}
+.wh-label{font-size:10px;font-family:var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.wh-label-pill{padding:2px 9px;border-radius:20px;font-size:9px;font-weight:600;background:var(--accent);color:#fff;letter-spacing:.04em;}
+.wh-label-pill.prev{background:var(--surface2);color:var(--muted);}
+.wh-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+.wh-kpi{padding:10px 0;}
+.wh-kpi-label{font-size:10px;font-family:var(--mono);color:var(--muted);margin-bottom:4px;}
+.wh-kpi-val{font-size:17px;font-weight:700;color:var(--text);margin-bottom:5px;letter-spacing:-0.3px;}
+.wh-deltas{display:flex;flex-direction:column;gap:2px;}
+.delta-row{display:flex;align-items:center;gap:5px;font-size:10px;font-family:var(--mono);}
+.delta-lbl{color:var(--muted);min-width:42px;}
+.delta-val{font-weight:600;}
+.delta-val.up{color:var(--up);}.delta-val.down{color:var(--down);}.delta-val.neu{color:var(--muted);}
+
+/* Section headers */
+.sh{display:flex;align-items:baseline;gap:10px;margin-bottom:12px;margin-top:22px;}
+.sh:first-child{margin-top:0;}
+.st{font-size:10px;font-family:var(--mono);letter-spacing:2px;text-transform:uppercase;color:var(--muted);white-space:nowrap;}
+.sl{flex:1;height:1px;background:var(--border);}
+.sd{font-size:11px;color:var(--muted);font-family:var(--mono);}
+
+/* Grid */
+.g{display:grid;gap:14px;}.g2{grid-template-columns:1fr 1fr;}.g3{grid-template-columns:1fr 1fr 1fr;}.g21{grid-template-columns:2fr 1fr;}
+.box{background:var(--surface);border:1px solid var(--border2);border-radius:14px;padding:18px 20px;box-shadow:var(--sh1);transition:box-shadow .18s;}
+.box:hover{box-shadow:var(--sh2);}
+.bh{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px;}
+.bt{font-size:13.5px;font-weight:600;color:var(--text);margin-bottom:3px;letter-spacing:-.01em;}.bw{font-size:11px;color:var(--muted);}
+.cw{position:relative;height:180px;}.cw.tall{height:220px;}.cw.short{height:130px;}
+
+/* Deep link */
+.deep-link{font-size:11px;font-weight:500;color:var(--accent);text-decoration:none;padding:6px 12px;border:1px solid rgba(29,78,216,0.3);border-radius:8px;background:rgba(29,78,216,0.05);transition:all 0.15s;flex-shrink:0;}
+.deep-link:hover{background:rgba(29,78,216,0.1);}
+
+/* Funnel steps */
+.fstep{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.flbl{font-size:10px;font-family:var(--mono);color:var(--muted);width:130px;text-align:right;flex-shrink:0;}
+.fbw{flex:1;height:24px;background:var(--surface2);border-radius:4px;overflow:hidden;}
+.fb{height:100%;border-radius:4px;display:flex;align-items:center;padding:0 8px;font-size:10px;font-weight:600;color:rgba(255,255,255,0.95);transition:width 0.5s;font-family:var(--mono);}
+.fpct{font-size:10px;font-family:var(--mono);color:var(--muted);width:50px;text-align:right;flex-shrink:0;}
+
+/* Health badge */
+.hbadge{display:inline-flex;align-items:center;padding:3px 11px;border-radius:20px;font-size:11px;font-weight:500;font-family:var(--mono);}
+.hbadge.green{background:var(--gbg);color:var(--up);border:1px solid var(--gbd);}
+.hbadge.amber{background:var(--abg);color:var(--warn);border:1px solid var(--abd);}
+.hbadge.red{background:var(--rbg);color:var(--down);border:1px solid var(--rbd);}
+
+@media (max-width: 900px) {
+  .week-hero, .g2, .g3, .g21 { grid-template-columns: 1fr; }
+  .content { padding: 14px; }
+  .ph { padding: 10px 14px; }
+}
+</style>
+</head>
+<body>
+
+<div class="ph">
+  <div class="ph-logo">Ketto</div>
+  <div class="ph-badge">MONTHLY</div>
+  <div class="ph-period" id="ph-period">Loading...</div>
+</div>
+
+<div class="cat-tabs" id="cat-tabs" style="display:none">
+  <div class="cat-tab active" style="--cat-color:#1D4ED8" data-cat="pm">Personal Medical</div>
+  <div class="cat-tab" style="--cat-color:#0E7490" data-cat="pnm">Personal Non-Medical</div>
+  <div class="cat-tab" style="--cat-color:#6D28D9" data-cat="nm">NGO Medical</div>
+  <div class="cat-tab" style="--cat-color:#15803D" data-cat="nnm">NGO Non-Medical</div>
+</div>
+
+<div class="content">
+  <div id="loader" class="loading">Loading data from Supabase…</div>
+  <div id="error" style="display:none"></div>
+  <div id="panels" style="display:none">
+    <div class="panel active" id="panel-pm"></div>
+    <div class="panel" id="panel-pnm"></div>
+    <div class="panel" id="panel-nm"></div>
+    <div class="panel" id="panel-nnm"></div>
+  </div>
+</div>
+
+<script src="js/lib.js"></script>
+<script>
+let DATA = null;
+
+function deltaRow(lbl, v) {
+  const val = parseFloat(v) * 100;
+  const cls = dCls(v);
+  const str = (val>0?'+':'')+val.toFixed(1)+'%';
+  return '<div class="delta-row"><span class="delta-lbl">'+lbl+'</span><span class="delta-val '+cls+'">'+str+'</span></div>';
+}
+
+function wkpiCard(label, val, fmtType, comp) {
+  const wow = comp?.wow_pct || 0;
+  const p12 = comp?.pct_12wk || 0;
+  const p24 = comp?.pct_24wk || 0;
+  return '<div class="wh-kpi">' +
+    '<div class="wh-kpi-label">'+label+'</div>' +
+    '<div class="wh-kpi-val">'+fmt(val, fmtType)+'</div>' +
+    '<div class="wh-deltas">' +
+      deltaRow('MoM', wow) +
+      deltaRow('12mo', p12) +
+      deltaRow('All', p24) +
+    '</div>' +
+  '</div>';
+}
+
+function buildPanel(catId) {
+  const d = DATA[catId];
+  if (!d) {
+    document.getElementById('panel-'+catId).innerHTML = '<div class="error-box">No data for ' + CAT_LABELS[catId] + '</div>';
+    return;
+  }
+  const color = CAT_COLORS[catId];
+  const w0 = d.w0, w1 = d.w1;
+  const wi = d.weeks.length;
+  const ci0 = wi - 1, ci1 = wi - 2;
+  const last12 = d.last12;
+  const l12labels = last12.map(w => weekLabel(w));
+  const comp0 = d.comp.w0, comp1 = d.comp.w1;
+
+  // Health badge
+  const don0 = comp0.donation?.wow_pct || 0;
+  const asv0 = comp0.asv?.wow_pct || 0;
+  const tip0 = comp0.tip_pct?.wow_pct || 0;
+  const hs = (don0>0.02?1:don0<-0.02?-1:0)*40 + (asv0>0.02?1:asv0<-0.02?-1:0)*30 + (tip0>0.02?1:tip0<-0.02?-1:0)*30;
+  const hsc = hs>0?'green':hs<0?'red':'amber';
+  const hsl = hs>0?'Good':hs<0?'Bad':'Neutral';
+
+  const el = document.getElementById('panel-'+catId);
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;margin-top:4px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:18px;font-weight:400;font-family:var(--serif);letter-spacing:-.02em">${CAT_LABELS[catId]}</div>
+        <span class="hbadge ${hsc}">${hsl}</span>
+      </div>
+      <a href="${DEEP_LINKS[catId]}" class="deep-link">Deep Dive &#8594;</a>
+    </div>
+
+    <div class="week-hero">
+      <div class="wh-card" style="border-left:3px solid ${color}">
+        <div class="wh-label"><span>${weekLabelLong(w0)}</span><span class="wh-label-pill">M-0</span></div>
+        <div class="wh-kpis">
+          ${wkpiCard('Total Donation', d.total_donation[ci0], 'c', comp0.donation)}
+          ${wkpiCard('Total Orders',   d.total_orders[ci0],   'n', comp0.orders)}
+          ${wkpiCard('Unique Donors',  d.unique_donors[ci0],  'n', comp0.donors)}
+          ${wkpiCard('Avg Ticket Size',d.asv[ci0],            'c', comp0.asv)}
+          ${wkpiCard('Tip Revenue',    d.tip_amount[ci0],     'c', comp0.tip)}
+          ${wkpiCard('Tip Attach %',   d.tip_pct[ci0]*100,    'p', comp0.tip_pct)}
+        </div>
+      </div>
+      <div class="wh-card" style="border-left:3px solid #ccccdd">
+        <div class="wh-label"><span>${weekLabelLong(w1)}</span><span class="wh-label-pill prev">M-1</span></div>
+        <div class="wh-kpis">
+          ${wkpiCard('Total Donation', d.total_donation[ci1], 'c', comp1.donation)}
+          ${wkpiCard('Total Orders',   d.total_orders[ci1],   'n', comp1.orders)}
+          ${wkpiCard('Unique Donors',  d.unique_donors[ci1],  'n', comp1.donors)}
+          ${wkpiCard('Avg Ticket Size',d.asv[ci1],            'c', comp1.asv)}
+          ${wkpiCard('Tip Revenue',    d.tip_amount[ci1],     'c', comp1.tip)}
+          ${wkpiCard('Tip Attach %',   d.tip_pct[ci1]*100,    'p', comp1.tip_pct)}
+        </div>
+      </div>
+    </div>
+
+    <div class="sh"><span class="st">12-Month Trend</span><div class="sl"></div><span class="sd">Last 12 months</span></div>
+    <div class="g g2" style="margin-bottom:14px">
+      <div class="box"><div class="bh"><div><div class="bt">Total Donation</div><div class="bw">Monthly donation trend</div></div></div><div class="cw"><canvas id="ch-don-${catId}"></canvas></div></div>
+      <div class="box"><div class="bh"><div><div class="bt">Orders &amp; Donors</div><div class="bw">Monthly volume</div></div></div><div class="cw"><canvas id="ch-ord-${catId}"></canvas></div></div>
+    </div>
+    <div class="g g3">
+      <div class="box"><div class="bh"><div><div class="bt">Avg Ticket Size</div></div></div><div class="cw short"><canvas id="ch-asv-${catId}"></canvas></div></div>
+      <div class="box"><div class="bh"><div><div class="bt">Tip Revenue</div></div></div><div class="cw short"><canvas id="ch-tip-${catId}"></canvas></div></div>
+      <div class="box"><div class="bh"><div><div class="bt">Tip Attach Rate</div></div></div><div class="cw short"><canvas id="ch-tipr-${catId}"></canvas></div></div>
+    </div>
+
+    <div class="sh" style="margin-top:20px"><span class="st">Payment Funnel</span><div class="sl"></div><span class="sd">M-1 vs M-0 + 12-month trend</span></div>
+    <div class="g g21">
+      <div class="box"><div class="bh"><div><div class="bt">Step-by-Step Conversion</div><div class="bw">UQ Visitors as base for first step</div></div></div><div id="funnel-${catId}" style="padding-top:4px"></div></div>
+      <div class="box"><div class="bh"><div><div class="bt">Funnel Step Conversion %</div><div class="bw">Last 12 months</div></div></div><div class="cw"><canvas id="ch-fstep-${catId}"></canvas></div></div>
+    </div>
+
+    <div class="sh" style="margin-top:20px"><span class="st">Campaigns</span><div class="sl"></div><span class="sd">Live &amp; Raised</span></div>
+    <div class="g g2">
+      <div class="box"><div class="bh"><div><div class="bt">Campaigns Live vs Raised</div></div></div><div class="cw"><canvas id="ch-camp-${catId}"></canvas></div></div>
+      <div class="box"><div class="bh"><div><div class="bt">Order Conversion Rate</div></div></div><div class="cw"><canvas id="ch-conv-${catId}"></canvas></div></div>
+    </div>
+
+    <div class="sh" style="margin-top:20px"><span class="st">Offline Payments</span><div class="sl"></div><span class="sd">QR · Bank Transfer · Coupon · Offline</span></div>
+    <div class="g g2" style="margin-bottom:14px">
+      <div class="box"><div class="bh"><div><div class="bt">Offline Payment Count</div><div class="bw">Monthly volume by channel</div></div></div><div class="cw"><canvas id="ch-ofl-count-${catId}"></canvas></div></div>
+      <div class="box"><div class="bh"><div><div class="bt">Offline Payment Amount</div><div class="bw">Monthly revenue by channel</div></div></div><div class="cw"><canvas id="ch-ofl-amt-${catId}"></canvas></div></div>
+    </div>
+    <div style="height:32px"></div>
+  `;
+
+  // Build series for last 12 weeks
+  function s12(arr) { return last12.map(w => arr[d.weeks.indexOf(w)]); }
+  const l12don   = s12(d.total_donation);
+  const l12ord   = s12(d.total_orders);
+  const l12dnr   = s12(d.unique_donors);
+  const l12asv   = s12(d.asv);
+  const l12tip   = s12(d.tip_amount);
+  const l12tipr  = s12(d.tip_pct).map(v => v*100);
+  const l12camp  = s12(d.campaigns_live);
+  const l12rsd   = s12(d.campaigns_raised);
+  const l12conv  = s12(d.order_conversion).map(v => v*100);
+
+  mkChart('ch-don-'+catId, 'bar', l12labels, [
+    {label:'Donation', data:l12don, backgroundColor:color+'33', borderColor:color, borderWidth:1.5, borderRadius:3}
+  ], {scales:{y:{ticks:{callback:v=>'₹'+(v>=1e5?(v/1e5).toFixed(0)+'L':(v/1000).toFixed(0)+'K')}}}});
+
+  mkChart('ch-ord-'+catId, 'line', l12labels, [
+    {label:'Orders', data:l12ord, borderColor:color, tension:0.3, fill:false, pointRadius:3, borderWidth:2},
+    {label:'Donors', data:l12dnr, borderColor:'#aaaacc', tension:0.3, fill:false, pointRadius:2, borderDash:[4,3]}
+  ], {scales:{y:{ticks:{callback:v=>v>=1000?(v/1000).toFixed(1)+'K':v}}}});
+
+  mkChart('ch-asv-'+catId, 'line', l12labels, [
+    {label:'ASV', data:l12asv, borderColor:color, tension:0.3, fill:false, pointRadius:3, borderWidth:2}
+  ], {scales:{y:{ticks:{callback:v=>'₹'+(v>=1000?(v/1000).toFixed(0)+'K':v)}}}});
+
+  mkChart('ch-tip-'+catId, 'bar', l12labels, [
+    {label:'Tip', data:l12tip, backgroundColor:color+'33', borderColor:color, borderWidth:1.5, borderRadius:3}
+  ], {scales:{y:{ticks:{callback:v=>'₹'+(v>=1000?(v/1000).toFixed(0)+'K':v)}}}});
+
+  mkChart('ch-tipr-'+catId, 'line', l12labels, [
+    {label:'Attach %', data:l12tipr, borderColor:color, backgroundColor:color+'18', tension:0.3, fill:true, pointRadius:3}
+  ], {scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}}});
+
+  // Funnel
+  const uqv1 = d.uq_visitors[ci1],     uqv0 = d.uq_visitors[ci0];
+  const ci1a = d.contri_initiated[ci1], ci0a = d.contri_initiated[ci0];
+  const cc1  = d.cart_created[ci1],    cc0  = d.cart_created[ci0];
+  const oc1  = d.order_created[ci1],   oc0  = d.order_created[ci0];
+  const op1  = d.order_placed[ci1],    op0  = d.order_placed[ci0];
+
+  function sconv(a, b) { return a > 0 ? Math.round(b/a*100) : 0; }
+  const steps = [
+    {n:'UQ Visitors',   v1:uqv1, v0:uqv0, p1:100,              p0:100},
+    {n:'Initiated',     v1:ci1a, v0:ci0a, p1:sconv(uqv1,ci1a), p0:sconv(uqv0,ci0a)},
+    {n:'Cart Created',  v1:cc1,  v0:cc0,  p1:sconv(ci1a,cc1),  p0:sconv(ci0a,cc0)},
+    {n:'Order Created', v1:oc1,  v0:oc0,  p1:sconv(cc1,oc1),   p0:sconv(cc0,oc0)},
+    {n:'Order Placed',  v1:op1,  v0:op0,  p1:sconv(oc1,op1),   p0:sconv(oc0,op0)},
+  ];
+  const maxV = Math.max(uqv1, uqv0);
+  document.getElementById('funnel-'+catId).innerHTML = steps.map(s => {
+    const w1pct = maxV > 0 ? s.v1/maxV*100 : 0;
+    const w0pct = maxV > 0 ? s.v0/maxV*100 : 0;
+    const delta = s.p0 - s.p1;
+    const dcls = delta>2?'up':delta<-2?'down':'neu';
+    const dstr = (delta>0?'+':'')+delta.toFixed(0)+'pp';
+    return '<div class="fstep">' +
+      '<div class="flbl">'+s.n+'</div>' +
+      '<div class="fbw" style="margin-right:4px"><div class="fb" style="width:'+w1pct.toFixed(1)+'%;background:#ccccdd;font-size:9px">'+fmt(s.v1,'n')+'</div></div>' +
+      '<div class="fbw"><div class="fb" style="width:'+w0pct.toFixed(1)+'%;background:'+color+';font-size:9px">'+fmt(s.v0,'n')+'</div></div>' +
+      '<div class="fpct" style="color:'+(dcls==='up'?'var(--up)':dcls==='down'?'var(--down)':'var(--muted)')+'">'+dstr+'</div>' +
+    '</div>';
+  }).join('') +
+  '<div style="display:flex;gap:14px;margin-top:8px;font-size:10px;font-family:var(--mono);color:var(--muted)">' +
+    '<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:#ccccdd;border-radius:2px;display:inline-block"></span>M-1 ('+weekLabel(w1)+')</span>' +
+    '<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;background:'+color+';border-radius:2px;display:inline-block"></span>M-0 ('+weekLabel(w0)+')</span>' +
+  '</div>';
+
+  // 3-line funnel step conversion trend (last 12 weeks)
+  const l12_initToCart = s12(d.init_to_cart).map(v => v*100);
+  const l12_cartToOc   = s12(d.cart_to_oc).map(v => v*100);
+  const l12_ocToPlaced = s12(d.oc_to_placed).map(v => v*100);
+  mkChart('ch-fstep-'+catId, 'line', l12labels, [
+    {label:'Initiated→Cart',    data:l12_initToCart, borderColor:'#6D28D9', backgroundColor:'#6D28D918', tension:0.3, fill:false, pointRadius:2.5, borderWidth:2},
+    {label:'Cart→Order Created',data:l12_cartToOc,   borderColor:'#92400E', backgroundColor:'#92400E18', tension:0.3, fill:false, pointRadius:2.5, borderWidth:2},
+    {label:'Order Created→Placed',data:l12_ocToPlaced,borderColor:color,     backgroundColor:color+'18',  tension:0.3, fill:false, pointRadius:2.5, borderWidth:2}
+  ], {scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}}});
+
+  // Campaign chart
+  mkChart('ch-camp-'+catId, 'bar', l12labels, [
+    {label:'Live', data:l12camp, backgroundColor:'rgba(170,170,200,0.5)', borderColor:'#aaaacc', borderWidth:1, borderRadius:2},
+    {label:'Raised', data:l12rsd, backgroundColor:color+'55', borderColor:color, borderWidth:1, borderRadius:2}
+  ]);
+
+  mkChart('ch-conv-'+catId, 'line', l12labels, [
+    {label:'Conversion %', data:l12conv, borderColor:color, backgroundColor:color+'18', tension:0.3, fill:true, pointRadius:3}
+  ], {scales:{y:{ticks:{callback:v=>v.toFixed(1)+'%'}}}});
+
+  // Offline payment charts
+  const l12qr_c    = s12(d.qr_order_count);
+  const l12bt_c    = s12(d.bank_transfer_count);
+  const l12cp_c    = s12(d.coupon_count);
+  const l12of_c    = s12(d.offline_count);
+  const l12qr_a    = s12(d.qr_order_amount);
+  const l12bt_a    = s12(d.bank_transfer_amount);
+  const l12cp_a    = s12(d.coupon_amount);
+  const l12of_a    = s12(d.offline_amount);
+
+  mkChart('ch-ofl-count-'+catId, 'bar', l12labels, [
+    {label:'QR',            data:l12qr_c, backgroundColor:'#1D4ED833', borderColor:'#1D4ED8', borderWidth:1, borderRadius:2, stack:'ofl'},
+    {label:'Bank Transfer', data:l12bt_c, backgroundColor:'#0E749033', borderColor:'#0E7490', borderWidth:1, borderRadius:2, stack:'ofl'},
+    {label:'Coupon',        data:l12cp_c, backgroundColor:'#6D28D933', borderColor:'#6D28D9', borderWidth:1, borderRadius:2, stack:'ofl'},
+  ], {scales:{x:{stacked:true},y:{stacked:true,ticks:{callback:v=>v>=1000?(v/1000).toFixed(1)+'K':v}}}});
+
+  mkChart('ch-ofl-amt-'+catId, 'bar', l12labels, [
+    {label:'QR',            data:l12qr_a, backgroundColor:'#1D4ED833', borderColor:'#1D4ED8', borderWidth:1, borderRadius:2, stack:'ofl'},
+    {label:'Bank Transfer', data:l12bt_a, backgroundColor:'#0E749033', borderColor:'#0E7490', borderWidth:1, borderRadius:2, stack:'ofl'},
+    {label:'Coupon',        data:l12cp_a, backgroundColor:'#6D28D933', borderColor:'#6D28D9', borderWidth:1, borderRadius:2, stack:'ofl'},
+  ], {scales:{x:{stacked:true},y:{stacked:true,ticks:{callback:v=>'\u20B9'+(v>=1e5?(v/1e5).toFixed(0)+'L':(v/1000).toFixed(0)+'K')}}}});
+}
+
+function switchCat(catId) {
+  document.querySelectorAll('.cat-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.cat === catId);
+  });
+  document.querySelectorAll('.panel').forEach(p => {
+    p.classList.toggle('active', p.id === 'panel-' + catId);
+  });
+  // Re-render to refresh charts after canvas becomes visible
+  buildPanel(catId);
+}
+
+async function init() {
+  try {
+    const rows = await loadSummary();
+    if (!rows.length) {
+      document.getElementById('loader').style.display = 'none';
+      document.getElementById('error').style.display = 'block';
+      document.getElementById('error').innerHTML = '<div class="error-box">No data found in <code>demand_monthly_summary</code>. Upload your CSV first.</div>';
+      return;
+    }
+    const shaped = shapeSummary(rows);
+    DATA = attachComp(shaped);
+
+    document.getElementById('loader').style.display = 'none';
+    document.getElementById('panels').style.display = 'block';
+    document.getElementById('cat-tabs').style.display = 'flex';
+
+    // Header period
+    const pm = DATA.pm;
+    if (pm) {
+      document.getElementById('ph-period').textContent = 'Month: ' + weekLabelLong(pm.w0);
+    }
+
+    // Attach tab handlers
+    document.querySelectorAll('.cat-tab').forEach(t => {
+      t.addEventListener('click', () => switchCat(t.dataset.cat));
+    });
+
+    buildPanel('pm');
+  } catch (e) {
+    console.error(e);
+    document.getElementById('loader').style.display = 'none';
+    document.getElementById('error').style.display = 'block';
+    document.getElementById('error').innerHTML = '<div class="error-box">Error loading data: ' + e.message + '</div>';
+  }
+}
+
+init();
+</script>
+</body>
+</html>
